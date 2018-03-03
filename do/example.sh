@@ -6,5 +6,5 @@ echo
 echo -e "${GREEN}This is example action${NC}"
 echo
 
-cat ./do/pony.art | base64 -D | gunzip
+cat ./do/pony.art | base64 -d | gunzip
 exit 1
