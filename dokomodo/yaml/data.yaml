@@ -1,0 +1,109 @@
+assetchains:
+  production:
+    REVS:
+      ammount: 1300000
+      p2p_port: 10195
+      rpc_port: 10196
+    SUPERNET:
+      amount: 816061
+      p2p_port: 11340
+      rpc_port: 11341
+    DEX:
+      amount: 999999
+      p2p_port: 11889
+      rpc_port: 11890
+    PANGEA:
+      amount:  999999
+      p2p_port: 14067
+      rpc_port: 14068
+    JUMBLR:
+      amount: 999999
+      p2p_port: 15105
+      rpc_port: 15106
+    BET:
+      amount: 999999
+      p2p_port: 14249
+      rpc_port: 14250
+    CRYPTO:
+      amount: 999999
+      p2p_port: 12947
+      rpc_port: 12948
+    HODL: 
+      amount: 9999999
+      p2p_port: 14430
+      rpc_port: 14431
+    MSHARK:
+      amount: 1400000
+      p2p_port: 10113
+      rpc_port: 10114
+    BOTS:
+      amount: 999999
+      p2p_port: 11363 
+      rpc_port: 11364
+    MGW:
+      amount: 999999
+      p2p_port: 12385
+      rpc_port: 12386
+    COQUI:
+      amount: 72000000
+      p2p_port: 14275 
+      rpc_port: 14276
+    WLC:
+      amount: 210000000
+      p2p_port: 12166
+      rpc_port: 12167
+    KV:
+      amount: 1000000
+      p2p_port: 8298
+      rpc_port: 8299
+    CEAL:
+      amount: 366666666
+      p2p_port: 11115
+      rpc_port: 11116
+    MESH:
+      amount: 1000007
+      p2p_port: 9454
+      rpc_port: 9455
+    MNZ:
+      amount: 257142858
+      p2p_port: 14336
+      rpc_port: 14337
+    AXO:
+      amount: 200000000
+      p2p_port: 12926
+      rpc_port: 12927
+    ETOMIC:
+      amount: 100000000
+      p2p_port: 10270
+      rpc_port: 10271
+    BTCH:
+      amount: 20998641
+      p2p_port: 8799
+      rpc_port: 8800
+    VOTE2018:
+      amount: 600000000
+      p2p_port: 10316
+      rpc_port: 10317
+    PIZZA:
+      amount: 100000000
+      p2p_port: 
+      rpc_port: 11116
+    BEER:
+      amount: 100000000
+      p2p_port: 
+      rpc_port: 8923
+    NINJA:
+      amount: 100000000
+      p2p_port: 15430
+      rpc_port: 15431
+  development:
+    PIZZA:
+      amount: 100000000
+      p2p_port: 11607 
+      rpc_port: 11608
+    BEER:
+      amount: 100000000
+      p2p_port: 8922
+      rpc_port: 8923  
+
+seed_host: zero.kolo.supernet.org
