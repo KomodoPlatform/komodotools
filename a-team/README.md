@@ -34,15 +34,10 @@ Save and Exit, then run the following commands to restart ssh server.
 >`sudo systemctl start sshd`
 >` logout `
 
-#### Upload the scripts folder
-Open a local terminal in the folder where the scripts.tar is located
->`sftp -P "ssh port" $USER@IPADDRESS`
-> `put scripts.tar`
-> `exit`
-
-Login and extract the scripts so we can go ahead and install everything.
-> ` ssh -p "ssh port" $USER@IPADDRESS`
-> `tar -xvf scripts.tar`
+#### Install the Scripts from my gitrepo
+> `git clone https://github.com/blackjok3rtt/komodotools.git`
+> `cp -r komodotools/a-team/scripts .` 
+> `rm -R komodotools'
 
 #### Run the install script
 >`cd ~/scripts/install`
