@@ -1,0 +1,6 @@
+#!/bin/bash
+bitcoind &
+sleep 10
+chipsd &
+sleep 10
+komodod &

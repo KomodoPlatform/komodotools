@@ -1,0 +1,20 @@
+#!/bin/bash
+seed_ip=`getent hosts seed.mewhub.com | awk '{ print $1 }'`
+source coinlist
+source pubkey.txt
+args=("$@")
+count=0
+delay=20
+while [ "x${coinlist[count]}" != "x" ]
+do
+  all=${coinlist[count]}
+  name=${all%% *}
+  supply=`expr "$all" : '.* \(.*\)'`
+  if [ "$name" != "" ]
+    then
+     gen=" -gen"
+     komodod -pubkey=$pubkey -ac_name=$name -ac_supply=$supply -addnode=$seed_ip $gen $args &
+     sleep $delay
+    fi
+  count=$(( $count +1 ))
+done
