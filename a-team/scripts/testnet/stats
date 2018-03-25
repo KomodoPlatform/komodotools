@@ -1,0 +1,18 @@
+#!/bin/bash
+IFS=
+cd ~/komodo/src
+now=$(date +"%Y-%m-%d %T%z")
+
+printf "$now \n";
+printf -- "-ASSET-%s\t\t-NTRZd-%s\t\t-UTXOs-%s\t\t-BLOX-%s\t\t-BAL-\n";
+printf "BTC%s\t\t-\t\t$(bitcoin-cli listunspent | grep .0005 | wc -l)%s\t\t-\t\t$(bitcoin-cli getwalletinfo | awk ' /\"balance\"/ {printf $2}' | sed 's/,//')\n";
+
+kmdinfo=$(./komodo-cli getinfo)
+beerinfo=$(./komodo-cli -ac_name=BEER getinfo)
+pizzainfo=$(./komodo-cli -ac_name=PIZZA getinfo)
+
+printf "KMD%s\t\t-\t\t$(./komodo-cli listunspent | grep .0005 | wc -l)%s\t\t"; printf "$kmdinfo" | awk ' /\"blocks\"/ {printf $2}' | sed 's/,//'; printf "%s\t\t"; printf "$kmdinfo" | awk ' /\"balance\"/ {print $2}' | sed 's/,//';
+printf "BEER%s\t\t$(./komodo-cli -ac_name=BEER listtransactions "" 77777 | grep -- -0.00418000 | wc -l)%s\t\t$(./komodo-cli -ac_name=BEER listunspent | grep .0005 | wc -l)%s\t\t"; printf "$beerinfo" | awk ' /\"blocks\"/ {printf $2}' | sed 's/,//'; printf "%s\t\t"; printf "$beerinfo" | awk ' /\"balance\"/ {print $2}' | sed 's/,//';
+printf "PIZZA%s\t\t$(./komodo-cli -ac_name=PIZZA listtransactions "" 77777 | grep -- -0.00418000 | wc -l)%s\t\t$(./komodo-cli -ac_name=PIZZA listunspent | grep .0005 | wc -l)%s\t\t"; printf "$pizzainfo" | awk ' /\"blocks\"/ {printf $2}' | sed 's/,//'; printf "%s\t\t"; printf "$pizzainfo" | awk ' /\"balance\"/ {print $2}' | sed 's/,//';
+
+#can also grep RXL3YXG2ceaB6C5hfJcN4fvmLH2C34knhA instead of checking for -0.00418000 if it proves unreliable
