@@ -35,10 +35,9 @@ Save and Exit, then run the following commands to restart ssh server.
 >` logout `
 
 #### Install the Scripts from my gitrepo
-> `git clone https://github.com/blackjok3rtt/komodotools.git`
-
- `cp -r komodotools/a-team/scripts .` 
- `rm -R komodotools`
+>`git clone https://github.com/blackjok3rtt/komodotools.git`
+>`cp -r komodotools/a-team/scripts .` 
+>`rm -R komodotools`
 
 #### Run the install script
 >`cd ~/scripts/install`
