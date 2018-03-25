@@ -30,11 +30,9 @@ Remove the '#' and change the port, scroll down to
 Remove the '#' and change 'yes' to 'no'
 
 Save and Exit, then run the following commands to restart ssh server.
->` sudo systemctl stop sshd`
+>`sudo systemctl stop sshd`
 
 >`sudo systemctl start sshd`
-
->` logout `
 
 #### Install the Scripts from my gitrepo
 > `git clone https://github.com/blackjok3rtt/komodotools.git`
