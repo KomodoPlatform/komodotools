@@ -1,84 +1,32 @@
-# DOkomodo - swiss army knife for Notary Nodes
+## Komodotools repository
+Purpose of this repository is to collect scripts/tools from Notary Nodes operators.
+We would like to get rid of scripts in [komodo](https://github.com/jl777/komodo) and [iguana](https://github.com/jl777/SuperNET) repositories. These supposed to serve as examples in the past. 
 
-Current komodo/iguana management scripts are not ideal and this is idea how to replace 
-existing komodo/iguana scripts with universal framework. Python [Click](http://click.pocoo.org) 
-framework was used which is ideal for creating CLI applications. Main idea of Click is that your
-functions will become excutable as commands.
+Because we did not decide what the best management tooling is, we will keep different ideas separated in directories until we fix problems which will converge to common tools.
 
-Features of DOkomodo:
-- single data file in yaml format (easy to edit), sections for prod and dev environments - all data
- like list of assetchains and their ports will come here.
-- repeating functions like e.g. loading list of assetchains do not have to be written again and again
-- data file loaded only once and data accessed via instance attributes
-- configuration in config.ini file allows you to say for which coins mining is enabled, you can disable
- minining completely or you can enable mining on randomly selected assetchains
-- currently only 2 commands available
+## Contribution
+- normal Github workflow is followed (fork this repo, create branch, make changes and push back to your repo, create PR, review, merge, repeat)
+- if you see similar script to one which exists in repo, try to implement your changes against it
+- each directory must contain README.md file with description how to install/use your scripts
+- update this README.md and add brief description what your script/tool does
+- try to keep only one version of file which would work in test and prod environments
+- once your scripts are merged into this repository, refer to it and push all updates here 
+- try to separate data/configs from code, if the data/configs will change, your scripts should still work without rewriting them
 
-## Installation steps
-### Enable python3 virtualenv
-Virtualenv is directory which contains all python packages you need for your project.
+## Directories content
+### kolo
+It was Kolo's idea to create this repository and here is his concept how it should work.
 
-Install virtualenv on Centos (as root user):
-```
-# yum install python34 python-pip
-```
+### dragonriders
+ - dokomodo - script written in Python [Click](http://click.pocoo.org) framework. 
+   - write funtcions which will become commands
+   - supports dev and prod environments
+   - assetchains data stored in yaml data file and ini config for configuration (you can enable mining for specific chains) 
+   - there is Config Class which takes care of parsing config/data files so no need to do it in you functions
+   - many other features supported by Click framework
 
-Install virtualenv on Ubuntu (as root):
-```
-# apt-get install python-pip
-```
+### a-team 
+ - complete step-by-step guide with bash installation scripts
 
-Now install virtualenv package:
-```
-# pip install -U virtualenv
-
-```
-
-Create our virtualenv
-```
-cd ~/venv_projects
-virtualenv -p python3 komodotools_venv
-```
-
-This is how we activate our virtualenvironment. You can deactivate it with `deactivate` command:
-```
-source ~/venv_projects/komodotools_venv/bin/activate
-```
-
-### Clone this repository
-Make sure you have activated your virtualenv before this step. 
-```
-cd ~/git_projects/
-git clone <this_repo>.git && cd komodotools
-pip install -Ur requirements.txt
-pip install --editable .
-```
-
-requirements.txt file contains list of all python packages we need for this project. All python packages will be installed into virtualenv folder you created. They won't collide with your system python packages.
-
-## How-to use it
-Once your virtualenv is activated, type `dokomodo`:
-```
-$ dokomodo
-Usage: dokomodo [OPTIONS] COMMAND [ARGS]...
-
-Options:
-  --help  Show this message and exit.
-
-Commands:
-  assetchains              Replacement for assetchains script
-  generate_docker_compose  Generates docker-compose file with all assetchains
-```
-
-Then you can continue specify subcommands:
-```
-$ dokomodo assetchains --help
-Usage: dokomodo assetchains [OPTIONS]
-
-Options:
-  -b, --branch [development|production]
-                                  [required]
-  --help                          Show this message and exit.
-```
-
-
+## Contacts
+Ideas can be discussed in [#notarynode](https://komodo-platform.slack.com) Slack channel, but please all code proposals discuss via PRs on Github.
