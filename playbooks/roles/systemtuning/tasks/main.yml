@@ -1,0 +1,15 @@
+# tasks file for systemtuning
+---
+- name: Construct fact
+  set_fact:
+    coins: "{{ assetchains[branch] }}"
+  
+- name: Configure firewalld for new assetchains
+  firewalld:
+    zone: public
+    port: "{{ item.value.p2p_port }}/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  with_dict: "{{ coins }}"
+  when: ansible_os_family == "RedHat"

@@ -1,0 +1,9 @@
+- hosts: all
+  vars:
+    branch: "{{ env | default('development') }}"
+    data_file: ../dragonriders/dokomodo/yaml/data.yaml
+  vars_files:
+    - "{{ data_file }}"
+  roles:
+    - { role: systemtuning } 
+
