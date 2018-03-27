@@ -62,7 +62,9 @@ Enter your users password and answer `Y` to install the dependencies.
 > `cd ~/scripts`
 
 >`./start.first`
+
 Wait a few min's... Start next one in new ssh session
+
 >`./sync_assets`
 
 While this is running we can install nanomsg and iguana in another ssh session:
@@ -182,4 +184,4 @@ The wallet.txt file in the scripts folder is no longer required. You should writ
 
 The passphrase.txt file is used by `wp_7776` to unlock the iguana wallet on node start-up. In the old guide, this passphrase was entered into the file directly, I just moved it to its own file. If anyone has a better or more secure way of doing this step please let me know. I am open to any collaboration to improve this document.
 
-
+There is a stats script also in the scripts folder by webworker01. This document is a product of many people, I just put it all in one place. Vote wisely. 
