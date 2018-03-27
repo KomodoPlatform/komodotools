@@ -1,0 +1,46 @@
+# vim: ts=2 sw=2 et
+version: '3'
+
+services:
+  {% for assetname, asset in items.items() %}
+  {{ assetname }}:
+    image: kmdplatform_komodo
+    network_mode: "host" 
+    ports:
+      {% if asset.rpc_port %}
+      - "127.0.0.1:{{ asset.rpc_port }}:{{ asset.rpc_port }}"
+      {% endif %}
+      {% if asset.p2p_port %}
+      - "{{ asset.p2p_port }}:{{ asset.p2p_port }}"
+      {% endif %}
+    volumes:
+      - komodo-data:/home/komodo/.komodo
+      - shared-data:/home/komodo/.shared:ro
+    environment:
+      - RPC_USER=${RPC_USER}
+      - RPC_PASSWORD=${RPC_PASSWORD}
+    command: > 
+      bash -c "komodod -pubkey=$$pubkey 
+      -ac_name={{ assetname }} 
+      -ac_supply={{ asset.amount }} 
+      -addnode={{ seed_ip }}{% for mine in mined %}
+      {% if assetname in mine %} -gen{% endif %}
+      {% if 'random' in mine %}
+      {% if range(0, 32767) | random % 10 == 1 %} 
+      -gen{% endif %}
+      {% endif %}"
+      {% endfor %}
+  
+  {% endfor %}
+
+volumes:
+  komodo-data:
+    driver_opts:
+      type: none
+      device: ${KOMODO_DATA}
+      o: bind
+  shared-data:
+    driver_opts:
+      type: none
+      device: ${SHARED_DATA}
+      o: bind
