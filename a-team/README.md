@@ -35,7 +35,7 @@ Save and Exit, then run the following commands to restart ssh server.
 >`sudo systemctl start sshd`
 
 #### Install the Scripts from my gitrepo
-> `git clone https://github.com/blackjok3rtt/komodotools.git`
+> `git clone https://github.com/KomodoPlatform/komodotools.git`
 
 > `cp -r komodotools/a-team/scripts .` 
 
