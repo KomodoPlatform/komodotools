@@ -84,14 +84,6 @@ assetchains:
       amount: 600000000
       p2p_port: 10316
       rpc_port: 10317
-    PIZZA:
-      amount: 100000000
-      p2p_port: 
-      rpc_port: 11116
-    BEER:
-      amount: 100000000
-      p2p_port: 
-      rpc_port: 8923
     NINJA:
       amount: 100000000
       p2p_port: 15430
