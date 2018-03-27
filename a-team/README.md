@@ -35,7 +35,7 @@ Save and Exit, then run the following commands to restart ssh server.
 >`sudo systemctl start sshd`
 
 #### Install the Scripts from my gitrepo
-> `git clone https://github.com/blackjok3rtt/komodotools.git`
+> `git clone https://github.com/KomodoPlatform/komodotools.git`
 
 > `cp -r komodotools/a-team/scripts .` 
 
@@ -93,10 +93,10 @@ The `genwallet.sh` script will create a random passphrase into ~/SuperNET/iguana
 
 >`./genwallet.sh`
 
-If you have a passphrase already create passphrase.txt with it.
+If you have a passphrase already create passphrase.txt with it. ** Make sure to place a space before the `echo` command so your passphrase is not saved in bash history.**
 >`cd ~/scripts/install`
 
->`echo passphrase="your passphrase in quotes" > ~/SuperNET/iguana/passphrase.txt`
+>` echo passphrase="your passphrase in quotes" > ~/SuperNET/iguana/passphrase.txt`
 
 Generate the wallet.txt file
 >`./genwallet2.sh`
