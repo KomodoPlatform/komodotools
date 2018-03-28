@@ -1,5 +1,6 @@
 #Check if BBR Module is avalible
-if [ "$(sudo modprobe tcp_bbr)" != "" ]
+sudo modprobe tcp_bbr
+if [ $? -ne 0 ]
 	then
 	  echo "tcp_bbr Module not supported, install other network tweaks"
 	  sudo cp 01-notary.conf /etc/sysctl.d/
