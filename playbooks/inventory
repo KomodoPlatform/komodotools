@@ -1,0 +1,2 @@
+[notary_nodes]
+mynotarynode	ansible_host=192.168.1.1 ansible_user=root ansible_password=secure
