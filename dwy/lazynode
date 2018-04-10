@@ -1,0 +1,534 @@
+#!/bin/bash
+pwdvalue=$(pwd)
+homeuser=$(echo '/'$(cat ~/SuperNET/iguana/userhome.txt)'/')
+komodo_binary=$(echo $homeuser"komodo/src/komodod")
+komodo_cli=$(echo $homeuser"komodo/src/komodo-cli")
+komodo_binary_dir=$(echo $homeuser"komodo/src")
+komodo_binary_name='komodod'
+seed_ip=`getent hosts zero.kolo.supernet.org | awk '{ print $1 }'`
+delay=20
+notalllaunched='0'
+source $homeuser/SuperNET/iguana/pubkey.txt
+re='^[0-9]+$'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+btcaddress="1BCJ3Rs6U9eqwsYJ5AjVZYEP3XxQLRt9kH"
+kmdaddress="RKUV7wkP4yTR1suVYLicf4ZaooQzz8u5iR"
+#Take a coin/ac/soft in param, ant initialize values to get other functions to work.
+inputparams() {
+	case $1 in
+		"iguana")
+			processname="iguana notary"
+		;;
+		"iguanascreen")
+			processname="SCREEN -d -m -S iguana"
+		;;
+		"chp"|"CHIPS")
+			processname="chipsd"
+			processcli="chips-cli"
+			processmincount=1
+			processargs=""
+			processpath="."
+			processlaunch="$processname"
+			processaddress="$kmdaddress"
+			notarysize='0.0001'
+			debugpath="$homeuser.chips/debug.log"
+		;;
+		"btc")
+			processname="bitcoind"
+			processcli="bitcoin-cli"
+			processmincount=1
+			processargs=""
+			processpath="."
+			processlaunch="$processname"
+			processaddress="$btcaddress"
+			notarysize='0.0001'
+			debugpath="$homeuser.bitcoin/debug.log"
+		;;
+		"kmd")
+			processname="$komodo_binary_name -gen -genproclimit=2 -notary"
+			processcli="$komodo_cli"
+			processmincount=1
+			processargs="-pubkey=\"$pubkey\""
+			processpath="$komodo_binary_dir"
+			processlaunch="./$processname $processargs"
+			processaddress="$kmdaddress"
+			notarysize='0.0001'
+			debugpath="$homeuser.komodo/debug.log"
+		;;
+		*)
+			aclist=$(echo $launchlistallcommented | grep $1 | wc -l)
+			if [ $aclist -eq 1 ]
+			then
+				supplyac=$(cat $homeuser/komodo/src/assetchains | grep $1 | cut -d ' ' -f3)
+				processname="$komodo_binary_name -ac_name=$1"
+				processcli="$komodo_cli -ac_name=$1"
+				processmincount=1
+				processargs="-pubkey=\"$pubkey\" -ac_supply=$supplyac -addnode=$seed_ip"
+				processpath="$komodo_binary_dir"
+				processlaunch="./$processname $processargs"
+				processaddress="$kmdaddress"
+				notarysize='0.0001'
+				debugpath="$homeuser.komodo/$1/debug.log"
+			else
+				echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$RED\tinputparams\t$1\tunknown param$NC" | tee -a logcheckagents
+				exit
+			fi
+		;;
+	esac
+}
+
+launchlisting () {
+	launchlistac="init"
+	launchlistall=$(echo -e "btc\nchp\nkmd")
+	launchlistallcommented=$launchlistall
+	while read line; do
+		if [ ! $line == 'komodo_asset' ]
+		then
+			launchlistall+=$(echo -e "\n$line")
+			if [ "$launchlistac" == "init" ]
+			then
+				launchlistac=$(echo "$line")
+			else	
+				launchlistac+=$(echo -e "\n$line")
+			fi
+		fi
+	done <<< "$(cat /home/dwy/komodo/src/assetchains | grep komodo_asset | grep -v '#' | cut -d ' ' -f2)"
+	launchlistallcoins=$launchlistall
+	launchlistall+=$(echo -e "\niguana")
+	#SPECIAL : INCLUDING ALL ASSETCHAINS THAT WILL BE PROCESSED BY IGUANA
+	while read line; do
+		if [ ! $line == 'komodo_asset' ]
+		then
+			launchlistallcommented+=$(echo -e "\n$line")
+		fi
+	done <<< "$(cat /home/dwy/komodo/src/assetchains | grep komodo_asset | cut -d ' ' -f2)"
+	launchlistdpow="init"
+	while read line2; do
+		if [ "$launchlistdpow" == "init" ]
+		then
+			launchlistdpow=$(echo "$line2")
+		else
+			launchlistdpow+=$(echo -e "\n$line2")
+		fi
+	done <<< "$(cat /home/dwy/komodo/src/dpowassets | grep curl | grep -v \# | sed 's/symbol\\"\:\\\"/\n/g' | grep -v curl | cut -d '\' -f1)"
+}
+
+
+
+startprocess() {
+	if [ "$1" == "iguana" ]
+	then
+		echo "$(date '+%Y-%m-%d %H:%M:%S') startprocess - iguana" | tee -a logcheckagents
+		screen -d -m -S iguana
+		screen -S iguana -X stuff 'cd'`echo -ne '\015'`'cd ~/SuperNET/iguana'`echo -ne '\015'`'git checkout beta && git pull && ./m_notary && cd ~/komodo/src && ./dpowassets'`echo -ne '\015'`
+	else
+		inputparams $1
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tstartprocess\t$1$NC" | tee -a logcheckagents
+		cd $processpath
+		$processlaunch &
+	fi
+}
+
+checksync() {
+	inputparams $1
+	if isrunning $1
+	then
+		checkinprogress='1'
+		while [ 1 ];do
+			processblockstatus=$($processcli getblockchaininfo 2>/dev/null | jq -r .blocks)
+			processblockheaders=$($processcli getblockchaininfo 2>/dev/null | jq -r .headers)
+			if [[ $processblockstatus =~ $re ]]
+			then
+				if ! [ $processblockstatus == "0" ]
+				then
+					if [ ! $processblockheaders == $processblockstatus ]
+					then
+						echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$RED\tchecksync\t$1\tsync NOK$NC" | tee -a logcheckagents
+					else
+						break
+					fi
+				else
+					echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tchecksync\t$1\tgetting best chain$NC" | tee -a logcheckagents
+				fi
+			else
+				echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tchecksync\t$1\tstart in progress$NC" | tee -a logcheckagents
+			fi
+			sleep 5
+		done
+		checkinprogress='0'
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$GREEN\tchecksync\t$1\tsync OK$NC" | tee -a logcheckagents
+	else
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$RED\tchecksync\t$1\tnot running$NC" | tee -a logcheckagents
+	fi
+}
+
+stopprocess() {
+	inputparams $1
+	PIDtokill=$(eval "pgrep -f '$processname'")
+	if [ ! $PIDtokill = "" ]
+	then
+		kill -15 $PIDtokill
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tstopprocess\t$1\tterminating : $PIDtokill$NC" | tee -a logcheckagents
+		sleep 2
+	fi
+}
+
+stopiguana() {
+	stopprocess iguana
+	stopprocess iguanascreen
+	screen -wipe
+}
+
+countac () {
+	while read line; do
+		if [ ! $line == 'komodo_asset' ]
+		then
+			if [ ! "$(pgrep -f $(echo "ac_name=${line}") | wc -l)" == '1' ]
+			then
+				notalllaunched='1'
+			fi
+		fi
+	done <<< "$launchlistac"
+}
+
+startac () {
+	echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tstartac\tinit$NC" | tee -a logcheckagents
+	while read line; do
+		if [ ! $line == 'komodo_asset' ]
+		then
+			if ! isrunning $line
+			then
+				startprocess $line
+			sleep 20
+			fi
+		fi
+	done <<< "$launchlistac"
+}
+
+isrunning() {
+	inputparams $1
+	if [ $(eval "pgrep -f '$processname'" | wc -l) == "1" ]
+	then
+		if [ -z "$2" ]
+		then	
+			echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$GREEN\tisrunning\t$1\tis running$NC" | tee -a logcheckagents
+		fi
+		true 
+	else
+		if [ -z "$2" ]
+		then
+			echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$RED\tisrunning\t$1\tis not running$NC" | tee -a logcheckagents
+		fi 
+		false
+	fi
+}
+
+globalrelaunch () {
+	echo "$launchlistall"
+	while read line; do
+		if [ ! "$line" == "iguana" ]
+		then
+			if ! isrunning $line
+			then
+				startprocess $line
+				sleep $delay
+			fi
+		else 
+			while read line2; do
+				checksync $line2
+				while [ 1 ];do
+					if [ "$checkinprogress" == "1" ]
+					then	
+						echo -e "$(date '+%Y-%m-%d %H:%M:%S')$NC\tglobalrelaunch\t$line2\twaiting sync to be finished"
+						sleep $delay
+					else
+						echo -e "$(date '+%Y-%m-%d %H:%M:%S')$NC\tglobalrelaunch\t$line2\tsync OK going to next"
+						break
+					fi
+				done
+			done <<< "$launchlistallcoins"
+			if ! isrunning $line
+			then
+				startprocess $line
+			fi
+		fi
+	done <<< "$launchlistall"
+	validateaddress
+}
+
+globalstop () {
+	while read line; do
+		if [ ! "$line" == "iguana" ]
+		then
+			if isrunning $line nolog
+			then
+				stopprocess $line
+				sleep 1
+			fi
+		else
+			if isrunning $line nolog
+			then
+				stopiguana
+			fi
+		fi
+	done <<< "$launchlistall"
+}
+
+shouldrun () {
+	while read line; do
+		isrunning $line
+	done <<< "$launchlistall"
+}
+
+validateaddress() {
+	searchvalidate='init'
+	if [ -z "$1" ]
+	then
+		searchvalidate=$launchlistallcoins
+	else
+		if [ "$(echo $launchlistallcommented | grep $1 | wc -l)" -eq 1 ]
+		then
+			searchvalidate=$1
+		else
+			if [ "$1" == "ac" ]
+			then
+				 searchvalidate=$launchlistac
+			else
+				if [ "$1" == "dpow" ]
+				then
+					searchvalidate=$(echo -e "$launchlistdpow")
+				fi
+			fi
+		fi
+	fi
+
+	if [ ! "$searchvalidate" == "init" ]
+	then
+		while read line; do
+			if isrunning $line nolog
+			then
+				inputparams $line
+				cd $processpath
+				if $($processcli validateaddress $processaddress | jq -r .isvalid)
+				then
+					if $($processcli validateaddress $processaddress | jq -r .ismine) == "true"
+					then
+						echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$GREEN\tvalidateaddress\t$line\tismine$NC" | tee -a logcheckagents
+					else
+						echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$RED\tvalidateaddress\t$line\tisnotmine$NC" | tee -a logcheckagents
+					fi
+				else
+					echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$RED\tvalidateaddress\t$line\tinvalidaddress$NC" | tee -a logcheckagents
+				fi 
+			else
+				echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$RED\tvalidateaddress\t$line\tprocess not running$NC" | tee -a logcheckagents
+			fi
+		done <<< "$searchvalidate"
+	else
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$RED\tvalidateaddress\t$line\tis invalid coin name$NC" | tee -a logcheckagents
+	fi
+
+}
+
+utxoreporting() {
+	#galtmines inspired :)
+	while read line; do
+		if isrunning $line
+		then
+			inputparams $line
+			cd $processpath
+			exactutxo=$($processcli listunspent|grep amount|awk '{print $2}'|sed s/.$//|awk -v not="$notarysize" '$1 == not'|wc -l)
+			uselessutxo=$($processcli listunspent|grep amount|awk '{print $2}'|sed s/.$//|awk -v not="$notarysize" '$1 < not'|wc -l)
+			thisbalance=$($processcli getbalance)
+			utxocount=$($processcli listunspent|grep amount |wc -l)
+			if [ "$exactutxo" -ge "50" ]	
+			then
+				TMPCOLOR=$GREEN
+			else
+				TMPCOLOR=$RED
+			fi
+			echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$TMPCOLOR\tutxoreporting\t$line\twellsized : $exactutxo$NC" | tee -a logcheckagents
+			echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$TMPCOLOR\tutxoreporting\t$line\tdust : $uselessutxo$NC" | tee -a logcheckagents
+			echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tutxoreporting\t$line\tbalance : $thisbalance$NC" | tee -a logcheckagents
+			echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tutxoreporting\t$line\tUTXO_Count : $utxocount$NC" | tee -a logcheckagents
+		fi
+	done <<< "$launchlistallcoins"
+
+}
+
+checknotarization () {
+#I don't know who did this !
+	if isrunning btc nolog && isrunning kmd nolog
+	then 
+		printf -- "-ASSET-%s\t-NTRZd-%s\t-UTXOs-%s\t-BAL-%s\n";
+		while read line; do
+			if isrunning $line nolog 
+			then
+				inputparams $line
+				cd $processpath
+				if [ "$line" == "btc" ]
+				then
+					printf "$line%s\t-\t$($processcli listunspent | grep $notarysize | wc -l)%s\t"; $processcli getwalletinfo | grep balance -m 1
+				else
+					printf "$line%s\t$($processcli listtransactions "" 77777 | grep -- -0.00418000 | wc -l)%s\t$($processcli listunspent | grep .0005 | wc -l)%s\t"; $processcli getinfo | grep balance
+				fi
+			fi
+		done <<< "$launchlistallcoins"
+	fi
+}
+
+getdebug () {
+	if [ -z "$2" ]
+	then
+		tailsize='5'
+	else
+		tailsize=$2
+	fi
+	debuglist='init'
+	if [ -z "$1" ]
+	then
+		debuglist=$launchlistallcoins
+	else
+		if [[ $1 =~ $re ]]
+		then
+			debuglist=$launchlistallcoins
+			tailsize=$1
+		else 
+			if [ "$(echo $launchlistallcommented | grep $1 | wc -l)" -eq 1 ]
+			then
+				debuglist=$1
+			else
+				if [ "$1" == "ac" ]
+				then
+					debuglist=$launchlistac
+				else
+					if [ "$1" == "dpow" ]
+					then
+						debuglist=$(echo -e "$launchlistdpow")
+					fi
+				fi
+			fi
+		fi
+	fi
+	if [ ! "$debuglist" == "init" ]
+	then
+		while read line; do
+			inputparams $line
+			echo -e "$GREEN$debugpath$NC"
+			echo "$(tail -$tailsize $debugpath)"
+		done <<< "$debuglist"
+	else
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$RED\tgetdebug\t$line\tis invalid coin name$NC" | tee -a logcheckagents
+	fi
+}
+
+helpme () {
+	if [ -z "$1" ]
+	then
+		echo -e "\n\tCOMMAND LIST"
+		echo -e "\n\n\tcheck"
+		echo -e "\tutxo"
+		echo -e "\tvalidateaddress [' '|coinname|ac|dpow]"
+		echo -e "\tisrunning \"coinname|iguana\" [nolog]"
+		echo -e "\tstartac"
+		echo -e "\tcountac"
+		echo -e "\tstopiguana"
+		echo -e "\tstopprocess \"coinname\""
+		echo -e "\tchecksync \"coinname\""
+		echo -e "\tstartprocess \"coinname\""
+		echo -e "\tlistac"
+		echo -e "\tlistdpow"
+		echo -e "\tlistall"
+		echo -e "\tlistallcommented"
+		echo -e "\tgetdebug [' '|coinname|ac|dpow] [tailsize]"
+		echo -e "\tstopall"
+		echo -e "\tshouldrun\n"		
+	fi
+
+}
+
+
+launchlisting
+
+case $1 in
+	"check")
+		globalrelaunch
+	;;
+	"stats")
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tManual Call\t$1$NC"
+		checknotarization	
+	;;
+	"utxo")
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tManual Call\t$1$NC"
+		utxoreporting
+	;;
+	"validateaddress")
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tManual Call\t$1\t$2$NC"
+		validateaddress $2
+	;;
+	"isrunning")
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tManual Call\t$1\t$2$NC"
+		isrunning $2
+	;;
+	"startac")
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tManual Call\t$1$NC"
+		startac
+	;;
+	"countac")
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tManual Call\t$1$NC"
+		countac
+		echo "$notalllaunched"
+	;;
+	"stopiguana")
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tManual Call\t$1$NC"
+		stopiguana
+	;;
+	"stopprocess")
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tManual Call\t$1\t$2$NC"
+		stopprocess $2
+	;;
+	"checksync")
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tManual Call\t$1\t$2$NC"
+		checksync $2
+	;;
+	"startprocess")
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tManual Call\t$1\t$2$NC"
+		startprocess $2
+	;;
+	"listac")
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tManual Call\t$1$NC"
+		echo "$launchlistac"
+	;;
+	"listdpow")
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tManual Call\t$1$NC"
+		echo "$launchlistdpow"
+	;;
+	"listall")
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tManual Call\t$1$NC"
+		echo "$launchlistall"
+	;;
+	"listallcommented")
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tManual Call\t$1$NC"
+		echo "$launchlistallcommented"
+	;;
+	"getdebug")
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tManual Call\t$1$NC"
+		getdebug $2 $3
+	;;
+	"stopall")
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tManual Call\t$1$NC"
+		globalstop
+	;;
+	"shouldrun")
+		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tManual Call\t$1$NC"
+		shouldrun
+	;;
+	"help")
+		helpme 
+	;;
+	*)
+		echo "Wtf are you doin here"
+	;;
+esac
