@@ -3,17 +3,22 @@
  - Install [Debian9](https://www.debian.org/distrib/netinst), with only the SSH server and "system utilities" 
  - Create your user in the install
  - On reboot login as your user, then:
- - ` export EDITOR=nano #skip if you can use vi `
+ - `su` - the password
+ - `apt-get install sudo`
+ - `export EDITOR=nano` #skip if you can use vi
  - `visudo`
- - Add your user to the Allow members of group etc line, replace $USER with your user name.
+ - Add your user to the Allow User privilege specification line, replace $USER with your user name.
+
 ` $USER ALL=(ALL:ALL) ALL `
+
 Save and Exit
+
 Close SSH Session
 
 On your local machine, assuming you have [created an SSH key pair](https://www.digitalocean.com/community/tutorials/how-to-configure-ssh-key-based-authentication-on-a-linux-server):
 > ` ssh-copy-id $USER@"ip address of your node" `
 
-Answer yes then type the current user's password.
+Answer yes then type your user's password.
 
 #### SSH to your node: 
 >` ssh $USER@IPADDRESS`
@@ -24,7 +29,7 @@ If it logs in without a password prompt, your key pair is installed and we can g
 Scroll down to 
 >` #Port 22` 
 
-Remove the '#' and change the port, scroll down to
+Remove the '#' and change the port if you want to, scroll down to
 >`#PasswordAuthentication yes `
 
 Remove the '#' and change 'yes' to 'no'
@@ -35,11 +40,13 @@ Save and Exit, then run the following commands to restart ssh server.
 >`sudo systemctl start sshd`
 
 #### Install the Scripts from my gitrepo
+> `sudo apt-get install git`
+
 > `git clone https://github.com/KomodoPlatform/komodotools.git`
 
 > `cp -r komodotools/a-team/scripts .` 
 
-> `rm -R komodotools`
+> `rm -R komodotools` # if you want to remove the other tools, they may come in handy later.
 
 #### Run the install script
 >`cd ~/scripts/install`
@@ -48,7 +55,7 @@ Save and Exit, then run the following commands to restart ssh server.
 
 Enter your users password and answer `Y` to install the dependencies.
 > Wait...... Be ready to enter user password again at sudo prompts at the end of the compilation. This will add sym-links for us for commands like: 
-> >komodo-cli
+>>komodo-cli
 
 >> chips-cli
 
