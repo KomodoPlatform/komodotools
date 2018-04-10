@@ -1,5 +1,5 @@
 #!/bin/bash
-touch ~/komodo/komodo.conf
+touch ~/.komodo/komodo.conf
 bitcoind &
 sleep 10
 chipsd &
