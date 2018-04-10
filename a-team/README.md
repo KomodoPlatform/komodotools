@@ -8,8 +8,11 @@
  - `export EDITOR=nano` #skip if you can use vi
  - `visudo`
  - Add your user to the Allow User privilege specification line, replace $USER with your user name.
+
 ` $USER ALL=(ALL:ALL) ALL `
+
 Save and Exit
+
 Close SSH Session
 
 On your local machine, assuming you have [created an SSH key pair](https://www.digitalocean.com/community/tutorials/how-to-configure-ssh-key-based-authentication-on-a-linux-server):
