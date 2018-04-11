@@ -94,7 +94,7 @@ launchlisting () {
 				launchlistac+=$(echo -e "\n$line")
 			fi
 		fi
-	done <<< "$(cat /home/dwy/komodo/src/assetchains | grep komodo_asset | grep -v '#' | cut -d ' ' -f2)"
+	done <<< "$(cat $homeuser/komodo/src/assetchains | grep komodo_asset | grep -v '#' | cut -d ' ' -f2)"
 	launchlistallcoins=$launchlistall
 	launchlistall+=$(echo -e "\niguana")
 	#SPECIAL : INCLUDING ALL ASSETCHAINS THAT WILL BE PROCESSED BY IGUANA
@@ -103,7 +103,7 @@ launchlisting () {
 		then
 			launchlistallcommented+=$(echo -e "\n$line")
 		fi
-	done <<< "$(cat /home/dwy/komodo/src/assetchains | grep komodo_asset | cut -d ' ' -f2)"
+	done <<< "$(cat $homeuser/komodo/src/assetchains | grep komodo_asset | cut -d ' ' -f2)"
 	launchlistdpow="init"
 	while read line2; do
 		if [ "$launchlistdpow" == "init" ]
@@ -112,7 +112,7 @@ launchlisting () {
 		else
 			launchlistdpow+=$(echo -e "\n$line2")
 		fi
-	done <<< "$(cat /home/dwy/komodo/src/dpowassets | grep curl | grep -v \# | sed 's/symbol\\"\:\\\"/\n/g' | grep -v curl | cut -d '\' -f1)"
+	done <<< "$(cat $homeuser/komodo/src/dpowassets | grep curl | grep -v \# | sed 's/symbol\\"\:\\\"/\n/g' | grep -v curl | cut -d '\' -f1)"
 }
 
 
