@@ -30,7 +30,6 @@ echo "rpcpassword=password`head -c 32 /dev/urandom | base64`" >> chips.conf
 echo "daemon=1" >> chips.conf
 echo "server=1" >> chips.conf
 echo "txindex=1" >> chips.conf
-echo "bind=127.0.0.1" >> chips.conf
 chmod 0600 chips.conf
 
 #Komodo
@@ -43,5 +42,4 @@ echo "rpcpassword=password`head -c 32 /dev/urandom | base64`" >> komodo.conf
 echo "daemon=1" >> komodo.conf
 echo "server=1" >> komodo.conf
 echo "txindex=1" >> komodo.conf
-echo "bind=127.0.0.1" >> komodo.conf
 chmod 0600 komodo.conf
