@@ -1,6 +1,6 @@
 #!/bin/bash
 #Input list of asset chains
-source ~/scripts/coinlist.dpow
+source ~/scripts/coinlist
 
 # Minimum number of UTXOs to maintain
 MINUTXOS=100
