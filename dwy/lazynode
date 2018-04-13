@@ -33,6 +33,7 @@ inputparams() {
 			processlaunch="$processname"
 			processaddress="$kmdaddress"
 			notarysize='0.0001'
+			statssize='0.00083600'						 
 			debugpath="$homeuser.chips/debug.log"
 		;;
 		"btc")
@@ -44,6 +45,7 @@ inputparams() {
 			processlaunch="$processname"
 			processaddress="$btcaddress"
 			notarysize='0.0001'
+			statssize='0.001064'					   
 			debugpath="$homeuser.bitcoin/debug.log"
 		;;
 		"kmd")
@@ -55,6 +57,7 @@ inputparams() {
 			processlaunch="./$processname $processargs"
 			processaddress="$kmdaddress"
 			notarysize='0.0001'
+			statssize='0.00098800'						 
 			debugpath="$homeuser.komodo/debug.log"
 		;;
 		*)
@@ -70,6 +73,7 @@ inputparams() {
 				processlaunch="./$processname $processargs"
 				processaddress="$kmdaddress"
 				notarysize='0.0001'
+				statssize='0.00083600'						  
 				debugpath="$homeuser.komodo/$1/debug.log"
 			else
 				echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$RED\tinputparams\t$1\tunknown param$NC" | tee -a logcheckagents
@@ -122,6 +126,8 @@ startprocess() {
 	then
 		echo "$(date '+%Y-%m-%d %H:%M:%S') startprocess - iguana" | tee -a logcheckagents
 		screen -d -m -S iguana
+		#screen -S iguana -X stuff 'cd'`echo -ne '\015'`'cd ~/SuperNET/iguana'`echo -ne '\015'`'git checkout beta && git pull && ./m_notary && cd ~/komodo/src && ./dpowassets'`echo -ne '\015'`
+		#screen -S iguana -X stuff 'cd'`echo -ne '\015'`'cd ~/SuperNET/iguana'`echo -ne '\015'`'git checkout dev && git pull && ./m_notary_testnet'`echo -ne '\015'`
 		screen -S iguana -X stuff 'cd'`echo -ne '\015'`'cd ~/SuperNET/iguana'`echo -ne '\015'`'git checkout beta && git pull && ./m_notary && cd ~/komodo/src && ./dpowassets'`echo -ne '\015'`
 	else
 		inputparams $1
@@ -368,12 +374,7 @@ checknotarization () {
 			then
 				inputparams $line
 				cd $processpath
-				if [ "$line" == "btc" ]
-				then
-					printf "$line%s\t-\t$($processcli listunspent | grep $notarysize | wc -l)%s\t"; $processcli getwalletinfo | grep balance -m 1
-				else
-					printf "$line%s\t$($processcli listtransactions "" 77777 | grep -- -0.00418000 | wc -l)%s\t$($processcli listunspent | grep .0005 | wc -l)%s\t"; $processcli getinfo | grep balance
-				fi
+				printf "$line%s\t-\t$($processcli listtransactions "" 1000 | grep -- -$statssize | wc -l)%s\t$($processcli listunspent | grep $notarysize | wc -l)%s\t"; $processcli getwalletinfo | grep balance -m 1
 			fi
 		done <<< "$launchlistallcoins"
 	fi
