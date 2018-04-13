@@ -1,0 +1,75 @@
+#!/bin/bash
+IFS=
+source coinlist
+#Change to sleepytime=false if you don't want it to loop
+sleepytime=600
+utxoamt=0.00010000
+ntrzdamt=-0.00083600
+
+btcntrzaddr=1P3rU1Nk1pmc2BiWC8dEy9bZa1ZbMp5jfg
+kmdntrzaddr=RXL3YXG2ceaB6C5hfJcN4fvmLH2C34knhA
+
+#How many transactions back to scan for notarizations
+txscanamount=77777
+
+format="%-8s %7s %6s %7s %12s\n"
+
+outputstats ()
+{
+    count=0
+    now=$(date +"%Y-%m-%d %T%z")
+
+    printf "\n\n%-8s %7s %6s %7s %12s\n" "-ASSET-" "-NTRZd-" "-UTXO-" "-BLOX-" "-BALANCE-";
+
+    printf "%-8s %7s %6s %7s %12s\n" "BTC" \
+            "$(bitcoin-cli listtransactions "" $txscanamount | grep $btcntrzaddr | wc -l)" \
+            "$(bitcoin-cli listunspent | grep $utxoamt | wc -l)" \
+            "$(bitcoin-cli getblockchaininfo | awk ' /\"blocks\"/ {printf $2}' | sed 's/,//')" \
+            "$(bitcoin-cli getbalance)"
+
+    kmdinfo=$(komodo-cli getinfo)
+    printf "$format" "KMD" \
+            "$(komodo-cli listtransactions "" $txscanamount | grep $kmdntrzaddr | wc -l)" \
+            "$(komodo-cli listunspent | grep $utxoamt | wc -l)" \
+            "$(echo $kmdinfo | awk ' /\"blocks\"/ {printf $2}' | sed 's/,//')" \
+            "$(echo $kmdinfo | awk ' /\"balance\"/ {printf $2}' | sed 's/,//')" \
+
+    chipsinfo=$(chips-cli getinfo)
+    printf "$format" "CHIPS" \
+            "$(chips-cli listtransactions "" $txscanamount | grep $kmdntrzaddr | wc -l)" \
+            "$(chips-cli listunspent | grep $utxoamt | wc -l)" \
+            "$(echo $chipsinfo | awk ' /\"blocks\"/ {printf $2}' | sed 's/,//')" \
+            "$(echo $chipsinfo | awk ' /\"balance\"/ {printf $2}' | sed 's/,//')" \
+
+    while [ "x${coinlist[count]}" != "x" ]
+    do
+        all=${coinlist[count]}
+        name=${all%% *}
+        #if [ "$name" != "" ]
+        if [ "$name" != "" ] && [ "$name" != "VOTE2018" ]
+        then
+            info=$(komodo-cli -ac_name=$name getinfo)
+            txinfo=$(komodo-cli -ac_name=$name listtransactions "" $txscanamount)
+
+            printf "$format" "$name" \
+                    "$(echo $txinfo | grep -- $kmdntrzaddr | wc -l)" \
+                    "$(komodo-cli -ac_name=$name listunspent | grep $utxoamt | wc -l)" \
+                    "$(echo $info | awk ' /\"blocks\"/ {printf $2}' | sed 's/,//')" \
+                    "$(echo $info | awk ' /\"balance\"/ {printf $2}' | sed 's/,//')" 
+        fi
+        count=$(( $count +1 ))
+    done
+    printf "$now";
+}
+
+if [ "$sleepytime" != "false" ]
+then
+    while true
+    do
+        outputstats
+        sleep $sleepytime
+    done
+else
+    outputstats
+    echo
+fi
