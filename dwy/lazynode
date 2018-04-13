@@ -127,8 +127,9 @@ startprocess() {
 		echo "$(date '+%Y-%m-%d %H:%M:%S') startprocess - iguana" | tee -a logcheckagents
 		screen -d -m -S iguana
 		#screen -S iguana -X stuff 'cd'`echo -ne '\015'`'cd ~/SuperNET/iguana'`echo -ne '\015'`'git checkout beta && git pull && ./m_notary && cd ~/komodo/src && ./dpowassets'`echo -ne '\015'`
-		#screen -S iguana -X stuff 'cd'`echo -ne '\015'`'cd ~/SuperNET/iguana'`echo -ne '\015'`'git checkout dev && git pull && ./m_notary_testnet'`echo -ne '\015'`
-		screen -S iguana -X stuff 'cd'`echo -ne '\015'`'cd ~/SuperNET/iguana'`echo -ne '\015'`'git checkout beta && git pull && ./m_notary && cd ~/komodo/src && ./dpowassets'`echo -ne '\015'`
+        #screen -S iguana -X stuff 'cd'`echo -ne '\015'`'cd ~/SuperNET/iguana'`echo -ne '\015'`'git checkout dev && git pull && ./m_notary_testnet'`echo -ne '\015'`
+        screen -S iguana -X stuff 'cd'`echo -ne '\015'`'cd ~/SuperNET/iguana'`echo -ne '\015'`'git checkout jl777 && git pull && ./m_notary_testnet'`echo -ne '\015'`
+
 	else
 		inputparams $1
 		echo -e "$NC$(date '+%Y-%m-%d %H:%M:%S')$NC\tstartprocess\t$1$NC" | tee -a logcheckagents
