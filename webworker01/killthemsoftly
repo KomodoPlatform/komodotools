@@ -1,0 +1,6 @@
+#!/bin/bash
+#komodo-cli stop
+#!/bin/bash
+pkill -15 komodod
+pkill -15 chipsd
+pkill -15 iguana
