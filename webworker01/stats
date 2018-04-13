@@ -5,6 +5,13 @@ source coinlist
 sleepytime=600
 utxoamt=0.00010000
 ntrzdamt=-0.00083600
+
+btcntrzaddr=1P3rU1Nk1pmc2BiWC8dEy9bZa1ZbMp5jfg
+kmdntrzaddr=RXL3YXG2ceaB6C5hfJcN4fvmLH2C34knhA
+
+#How many transactions back to scan for notarizations
+txscanamount=77777
+
 format="%-8s %7s %6s %7s %12s\n"
 
 outputstats ()
@@ -15,21 +22,21 @@ outputstats ()
     printf "\n\n%-8s %7s %6s %7s %12s\n" "-ASSET-" "-NTRZd-" "-UTXO-" "-BLOX-" "-BALANCE-";
 
     printf "%-8s %7s %6s %7s %12s\n" "BTC" \
-            "$(bitcoin-cli listtransactions "" 77777 | grep -- $ntrzdamt | wc -l)" \
+            "$(bitcoin-cli listtransactions "" $txscanamount | grep $btcntrzaddr | wc -l)" \
             "$(bitcoin-cli listunspent | grep $utxoamt | wc -l)" \
             "$(bitcoin-cli getblockchaininfo | awk ' /\"blocks\"/ {printf $2}' | sed 's/,//')" \
             "$(bitcoin-cli getbalance)"
 
     kmdinfo=$(komodo-cli getinfo)
     printf "$format" "KMD" \
-            "$(komodo-cli listtransactions "" 77777 | grep -- $ntrzdamt | wc -l)" \
+            "$(komodo-cli listtransactions "" $txscanamount | grep $kmdntrzaddr | wc -l)" \
             "$(komodo-cli listunspent | grep $utxoamt | wc -l)" \
             "$(echo $kmdinfo | awk ' /\"blocks\"/ {printf $2}' | sed 's/,//')" \
             "$(echo $kmdinfo | awk ' /\"balance\"/ {printf $2}' | sed 's/,//')" \
 
     chipsinfo=$(chips-cli getinfo)
     printf "$format" "CHIPS" \
-            "$(chips-cli listtransactions "" 77777 | grep -- $ntrzdamt | wc -l)" \
+            "$(chips-cli listtransactions "" $txscanamount | grep $kmdntrzaddr | wc -l)" \
             "$(chips-cli listunspent | grep $utxoamt | wc -l)" \
             "$(echo $chipsinfo | awk ' /\"blocks\"/ {printf $2}' | sed 's/,//')" \
             "$(echo $chipsinfo | awk ' /\"balance\"/ {printf $2}' | sed 's/,//')" \
@@ -42,10 +49,10 @@ outputstats ()
         if [ "$name" != "" ] && [ "$name" != "VOTE2018" ]
         then
             info=$(komodo-cli -ac_name=$name getinfo)
-            txinfo=$(komodo-cli -ac_name=$name listtransactions "" 77777)
+            txinfo=$(komodo-cli -ac_name=$name listtransactions "" $txscanamount)
 
             printf "$format" "$name" \
-                    "$(echo $txinfo | grep -- $ntrzdamt | wc -l)" \
+                    "$(echo $txinfo | grep -- $kmdntrzaddr | wc -l)" \
                     "$(komodo-cli -ac_name=$name listunspent | grep $utxoamt | wc -l)" \
                     "$(echo $info | awk ' /\"blocks\"/ {printf $2}' | sed 's/,//')" \
                     "$(echo $info | awk ' /\"balance\"/ {printf $2}' | sed 's/,//')" 
@@ -66,4 +73,3 @@ else
     outputstats
     echo
 fi
-#can also grep RXL3YXG2ceaB6C5hfJcN4fvmLH2C34knhA instead of checking for -0.00418000 if it proves unreliable
