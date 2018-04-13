@@ -367,7 +367,7 @@ utxoreporting() {
 }
 
 checknotarization () {
-#I don't know who did this !
+#Webworker01 adapted with running coins
 	if isrunning btc nolog && isrunning kmd nolog
 	then 
 		printf -- "-ASSET-%s\t-NTRZd-%s\t-UTXOs-%s\t-BAL-%s\n";
@@ -376,7 +376,7 @@ checknotarization () {
 			then
 				inputparams $line
 				cd $processpath
-				printf "$line%s\t-\t$($processcli listtransactions "" 1000 | grep -- -$statssize | wc -l)%s\t$($processcli listunspent | grep $notarysize | wc -l)%s\t"; $processcli getwalletinfo | grep balance -m 1
+				printf "$line%s\t$($processcli listtransactions "" 1000 | grep -- -$statssize | wc -l)%s\t$($processcli listunspent | grep $notarysize | wc -l)%s\t"; $processcli getwalletinfo | grep balance -m 1
 			fi
 		done <<< "$launchlistallcoins"
 	fi
