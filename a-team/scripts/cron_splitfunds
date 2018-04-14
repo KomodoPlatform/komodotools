@@ -1,6 +1,6 @@
 #!/bin/bash
 #Input list of asset chains
-source ~/scripts/coinlist.dpow
+source ~/scripts/coinlist
 
 # Minimum number of UTXOs to maintain
 MINUTXOS=100
@@ -16,7 +16,7 @@ printf "$now \n";
 echo "Checking BTC, CHIPS, KMD"
 cd ~
 echo -n BTC
-UTXOS="$(bitcoin-cli listunspent | grep .0005 | wc -l)"
+UTXOS="$(bitcoin-cli listunspent | grep .0001 | wc -l)"
 echo -n -e '\t\t';echo -n "$UTXOS"
 if [ "$UTXOS" -lt "$MINUTXOS" ]
    then 
@@ -27,7 +27,7 @@ if [ "$UTXOS" -lt "$MINUTXOS" ]
 echo ""
 
 echo -n CHIPS
-UTXOS="$(chips-cli listunspent | grep .0005 | wc -l)"
+UTXOS="$(chips-cli listunspent | grep .0001 | wc -l)"
 echo -n -e '\t\t';echo -n "$UTXOS"
 if [ "$UTXOS" -lt "$MINUTXOS" ]
    then 
@@ -38,7 +38,7 @@ if [ "$UTXOS" -lt "$MINUTXOS" ]
 echo ""
 
 echo -n KMD
-UTXOS="$(komodo-cli listunspent | grep .0005 | wc -l)"
+UTXOS="$(komodo-cli listunspent | grep .0001 | wc -l)"
 echo -n -e '\t\t';echo -n "$UTXOS"
 if [ "$UTXOS" -lt "$MINUTXOS" ]
    then 
@@ -58,7 +58,7 @@ do
   if [ "$name" != "" ]
     then
       echo -n "$name"
-      UTXOS="$(komodo-cli -ac_name=$name listunspent | grep .0005 | wc -l)"
+      UTXOS="$(komodo-cli -ac_name=$name listunspent | grep .0001 | wc -l)"
       echo -n -e '\t\t';echo -n "$UTXOS"
       if [ "$UTXOS" -lt "$MINUTXOS" ]
        then 

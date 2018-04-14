@@ -1,0 +1,4 @@
+#!/bin/bash
+chipsd &
+cd komodo
+./src/komodod -gen -genproclimit=2 -notary -pubkey="02b207a2be16f205184664c88c8dc842f128a79a3a6c03741e5506cb480cb48268" &

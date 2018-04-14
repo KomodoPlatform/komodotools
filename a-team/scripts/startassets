@@ -1,7 +1,7 @@
 #!/bin/bash
 seed_ip=`getent hosts seed.mewhub.com | awk '{ print $1 }'`
 source coinlist
-source pubkey.txt
+source ~/komodo/src/pubkey.txt
 args=("$@")
 count=0
 delay=20

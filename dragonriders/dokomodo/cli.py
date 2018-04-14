@@ -51,6 +51,8 @@ class Config(object):
         except OSError as exception:
             click.echo('{} file could not be read: {}'.format(self.config_ini, exception))
 
+        self.btcpubkey = ini_parser['DEFAULT']['btcpubkey']
+
         self.assetchains = ini_parser['ASSETCHAINS']
         self.mined_coins = self.assetchains['mined_coins'].split()
         self.delay_asset = float(self.assetchains['delay_asset'])
@@ -97,7 +99,7 @@ def generate_docker_compose(ctx, branch):
     click.echo('Writing new docker compose file into: {}'.format(filename))
     template = env.get_template('docker-compose-template.conf.j2')
     templatized_config = template.render(items=ctx.config_data['assetchains'][branch],
-        seed_ip=ctx.seed_ip, mined=ctx.mined_coins)
+        seed_ip=ctx.seed_ip, mined=ctx.mined_coins, btcpubkey=ctx.btcpubkey)
 
     ctx.write_config(filename=filename, templatized_config=templatized_config)
 
@@ -109,7 +111,7 @@ def generate_docker_compose(ctx, branch):
 def assetchains(ctx, branch):
     bash_template = env.get_template('assetchains.j2')
     bash_templatized_config = bash_template.render(items=ctx.config_data['assetchains'][branch],
-        seed_ip=ctx.seed_ip, mined=ctx.mined_coins)
+        seed_ip=ctx.seed_ip, mined=ctx.mined_coins, btcpubkey=ctx.btcpubkey)
 
     # Remove empty strings
     assetchains = list(filter(None, bash_templatized_config.split("\n")))
@@ -138,7 +140,8 @@ def generate_assetchains_conf(ctx, branch, asset):
         asset_templatized_config = asset_template.render(
             rpcuser=ctx.rpc_username,
             rpcpassword=ctx.rpc_password,
-            rpcport=ctx.config_data['assetchains'][branch][assetchain_name]['rpc_port']
+            rpcport=ctx.config_data['assetchains'][branch][assetchain_name]['rpc_port'],
+            btcpubkey=ctx.btcpubkey
         )
 
         ctx.write_config(dirname, filename, asset_templatized_config)
