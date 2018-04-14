@@ -28,7 +28,7 @@ for D in *; do
         then
                 echo "# Assetchain - ${D}"
                 rpcport=$(sed -n -e '/^rpcport=/p' ~/.komodo/${D}/${D}.conf | cut -d "=" -f2)
-                echo "sudo iptables -A INPUT -p tcp --dport $((rpcport+1)) -j ACCEPT"
+                echo "sudo iptables -A INPUT -p tcp --dport $((rpcport-1)) -j ACCEPT"
         fi
     fi
 done
