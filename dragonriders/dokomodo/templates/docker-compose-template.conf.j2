@@ -34,8 +34,8 @@ services:
       {% if 'random' in mine %}
       {% if range(0, 32767) | random % 10 == 1 %} 
       -gen{% endif %}
-      {% endif %}"
-      {% endfor %}
+      {% endif %}
+      {% endfor %}"
   
   {% endfor %}
 

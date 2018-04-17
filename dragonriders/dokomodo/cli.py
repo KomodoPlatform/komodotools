@@ -10,6 +10,8 @@ import click
 from py import path
 from sys import exit
 from os import path as expander
+from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
+
 
 # asset_data_url = ("https://raw.githubusercontent.com/patchkez/kmdplatform/"
 #    "master/yaml/data.yaml")
@@ -60,6 +62,11 @@ class Config(object):
         self.rpc_password = self.assetchains['rpc_password']
         self.write_path_conf = self.assetchains['write_path_conf']
 
+        self.scaling_tests = ini_parser['SCALING_TESTING']
+        self.sendtomany_recipients = self.scaling_tests['sendtomany_recipients']
+        self.number_of_requests = self.scaling_tests['number_of_requests']
+        self.delay_between_requests = self.scaling_tests['delay_between_requests']
+
     def write_config(self, dirname, filename, templatized_config):
         # If directory is not set, set it to current directory
         if dirname is False:
@@ -90,22 +97,25 @@ def cli(config):
 
 @click.command('generate_docker_compose',
     short_help='Generates docker-compose file with all assetchains')
-@click.option('-b', '--branch', required=True, type=click.Choice(['development', 'production']),
+@click.option('-b', '--branch', required=True, type=click.Choice(['development', 'production',
+    'test']),
     prompt=True)
 @pass_config
 def generate_docker_compose(ctx, branch):
     """ TODO """
     filename = 'docker-compose_assets_' + branch + '.yml'
+    dirname = "./"
     click.echo('Writing new docker compose file into: {}'.format(filename))
     template = env.get_template('docker-compose-template.conf.j2')
     templatized_config = template.render(items=ctx.config_data['assetchains'][branch],
         seed_ip=ctx.seed_ip, mined=ctx.mined_coins, btcpubkey=ctx.btcpubkey)
 
-    ctx.write_config(filename=filename, templatized_config=templatized_config)
+    ctx.write_config(dirname, filename=filename, templatized_config=templatized_config)
 
 
 @click.command('assetchains', short_help='Replacement for assetchains script')
-@click.option('-b', '--branch', required=True, type=click.Choice(['development', 'production']),
+@click.option('-b', '--branch', required=True, type=click.Choice(['development', 'production',
+    'test']),
     prompt=True)
 @pass_config
 def assetchains(ctx, branch):
@@ -128,7 +138,8 @@ def assetchains(ctx, branch):
 
 @click.command('generate_assetchains_conf', short_help='Generates configuration file for \
     assetchains')
-@click.option('-b', '--branch', required=True, type=click.Choice(['development', 'production']))
+@click.option('-b', '--branch', required=True, type=click.Choice(['development', 'production',
+    'test']))
 @click.option('-a', '--asset', required=False)
 @pass_config
 def generate_assetchains_conf(ctx, branch, asset):
@@ -160,10 +171,52 @@ def generate_assetchains_conf(ctx, branch, asset):
             templatize(assetchain_name)
 
 
+@click.command('sendmany_assetchains', short_help='Import private key into assetchains')
+@click.option('-b', '--branch', required=True, type=click.Choice(['development', 'production',
+    'test']))
+@click.option('-a', '--asset', required=False)
+@pass_config
+def sendmany_assetchains(ctx, branch, asset):
+
+    def send_request(assetchain_name, assetchain_rpcport):
+        assetchain_rpcuser = 'rpcuser'
+        assetchain_rpcpassword = 'rpcpassword'
+
+        # request_url = (
+        #     'http://' + asset_rpcuser + ':' + asset_rpcpassword + '@' + assetchain_name + ':' +
+        #     assetchain_rpcport)
+
+        rpc_connection = AuthServiceProxy("http://%s:%s@%s:%s" % (assetchain_rpcuser,
+            assetchain_rpcpassword, assetchain_name, int(assetchain_rpcport)))
+
+        try:
+            rpc_connection.sendmany("", ctx.sendtomany_recipients)
+        except JSONRPCException as e:
+            click.echo("Error: %s" % e.error['message'])
+
+    counter = 0
+    while counter < float(ctx.number_of_requests):
+        # click.echo(ctx.config_data['assetchains'][branch])
+        for assetchain_name in ctx.config_data['assetchains'][branch]:
+            # click.echo(type(assetchain_name))
+            rpc_port = ctx.config_data['assetchains'][branch][assetchain_name]['rpc_port']
+            if asset and asset == assetchain_name:
+                click.echo('Sending request to: {}'.format(assetchain_name))
+                send_request(assetchain_name, rpc_port)
+            elif asset:
+                pass
+            else:
+                click.echo('Sending request to: {}'.format(assetchain_name))
+                send_request(assetchain_name, rpc_port)
+        counter += 1
+        sleep(ctx.delay_between_requests)
+
+
 # Add functions into cli() function which is main group for all commands
 cli.add_command(generate_docker_compose)
 cli.add_command(assetchains)
 cli.add_command(generate_assetchains_conf)
+cli.add_command(sendmany_assetchains)
 
 
 if __name__ == "__main__":
