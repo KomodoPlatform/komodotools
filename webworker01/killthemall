@@ -1,4 +1,0 @@
-#!/bin/bash
-pkill -9 komodod
-pkill -9 chipsd
-pkill -9 iguana
