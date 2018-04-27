@@ -368,26 +368,42 @@ def start_iguana(ctx, branch, asset, password):
     # click.echo(wallet)
     post_rpc(url, wallet, auth)
 
+    # Add coins + DPOW
     coins = branch + '_coins'
     for assetchain_key in ctx.iguana[coins].split(', '):
-        # click.echo('Assetchain {}'.format(assetchain_key))
+        # Read only assetchains payloads
         payload = ctx.new_config_data['assetchains'][assetchain_key]['iguana_payload']
-        # click.echo('Payload {}'.format(payload['genesisblock']))
 
         # Replace ${HOME#/} with value in our INI file
+        # remove first '/'
         home = re.sub(r"\/", "", ctx.iguana_home_dir, 1)
+        # Read value of 'path' key
         line = payload['path']
+        # Substitute
         newline = re.sub(r"\$\{HOME\#\/\}", home, line)
+        # Update value in loaded dictionary
         ctx.new_config_data['assetchains'][assetchain_key]['iguana_payload']['path'] = newline
-        # click.echo(newline)
+
+        # Dpow
+        dpow = ctx.new_config_data['misc_methods']['dpow']
+        dpow['pubkey'] = ctx.btcpubkey
+        dpow['symbol'] = assetchain_key
+    # click.echo(wallet)
         if asset and asset == assetchain_key:
-            click.echo('Sending request to: {}'.format(assetchain_key))
+            click.echo('Sending addcoin request to: {}'.format(assetchain_key))
             post_rpc(url, payload, auth)
+            sleep(3)
+            click.echo('Sending dpow {} request to: {}'.format(dpow, assetchain_key))
+            post_rpc(url, dpow, auth)
         elif asset:
             pass
         else:
-            click.echo('Sending request to: {}'.format(assetchain_key))
+            click.echo('Sending addcoin request to: {}'.format(assetchain_key))
             post_rpc(url, payload, auth)
+            sleep(10)
+            click.echo('Sending dpow {} request to: {}'.format(dpow, assetchain_key))
+            post_rpc(url, dpow, auth)
+            sleep(10)
 
 
 # Add functions into cli() function which is main group for all commands
