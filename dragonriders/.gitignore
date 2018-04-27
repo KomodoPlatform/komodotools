@@ -1,7 +1,7 @@
 *.swp
 assetchains
 komodotools_venv/
-docker-compose_assets_development.yml
-docker-compose_assets_production.yml
+docker-compose_assets_*.yml
 __pycache__
 dokomodo.egg-info
+assetchains_data.yaml
