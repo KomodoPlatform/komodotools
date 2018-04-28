@@ -57,23 +57,22 @@ save_assets_data()
 
 
 # This is common function for sending rpc requests to bitcoind and komodod
-def send_request(assetchain_name, assetchain_rpcport, method):
-    assetchain_rpcuser = 'rpcuser'
-    assetchain_rpcpassword = 'rpcpassword'
+def send_request(rpc_host, rpc_port, rpc_user, rpc_password):
+    # assetchain_rpcuser = 'rpcuser'
+    # assetchain_rpcpassword = 'rpcpassword'
 
     # request_url = (
     #     'http://' + asset_rpcuser + ':' + asset_rpcpassword + '@' + assetchain_name + ':' +
     #     assetchain_rpcport)
 
-    rpc_connection = AuthServiceProxy("http://%s:%s@%s:%s" % (assetchain_rpcuser,
-        assetchain_rpcpassword, assetchain_name, int(assetchain_rpcport)))
+    return AuthServiceProxy("http://{}:{}@{}:{}".format(rpc_user,
+        rpc_password, rpc_host, int(rpc_port)))
 
-    sendmethod = rpc_connection + '.' + method
-    try:
-        # rpc_connection.sendmany("", ctx.sendtomany_recipients)
-        sendmethod
-    except JSONRPCException as e:
-        click.echo("Error: %s" % e.error['message'])
+    # try:
+    #    # rpc_connection.sendmany("", ctx.sendtomany_recipients)
+    #    click.echo(rpc_connection.getinfo())
+    # except JSONRPCException as e:
+    #    click.echo("Error: %s" % e.error['message'])
 
 
 # Common fucntion for sending any http API request e.g. to iguana
@@ -199,7 +198,7 @@ def cli(config):
 @pass_config
 def generate_docker_compose(ctx, branch):
     """ TODO """
-    filename = 'docker-compose_assets_' + branch + '.yml'
+    filename = 'docker-compose-assets-' + branch + '.yml'
     dirname = "./"
     click.echo('Writing new docker compose file into: {}'.format(filename))
     template = env.get_template('docker-compose-template.conf.j2')
@@ -215,10 +214,13 @@ def generate_docker_compose(ctx, branch):
     'test']), prompt=True)
 @click.option('-a', '--asset', required=False, help='name of assetchain in capital \
     letters e.g. SUPERNET')
+@click.option('-i', '--image', required=True, help='name of image used for assetchains, \
+    it must match image name you use for komodod e.g. kmdplatform_komodod_dev or \
+    kmdplatform_komodod')
 @pass_config
-def generate_new_docker_compose(ctx, branch, asset):
+def generate_new_docker_compose(ctx, branch, asset, image):
     """ TODO """
-    filename = 'docker-compose_assets_' + branch + '.yml'
+    filename = 'docker-compose-assets-' + branch + '.yml'
     dirname = "./"
     click.echo('Writing new docker compose file into: {}'.format(filename))
 
@@ -241,7 +243,7 @@ def generate_new_docker_compose(ctx, branch, asset):
 
     template = env.get_template('docker-compose-new-template.conf.j2')
     templatized_config = template.render(items=filtered_yaml(),
-        seed_ip=ctx.seed_ip2, mined=ctx.mined_coins, btcpubkey=ctx.btcpubkey)
+        seed_ip=ctx.seed_ip2, mined=ctx.mined_coins, btcpubkey=ctx.btcpubkey, image_name=image)
     ctx.write_config(dirname, filename=filename, templatized_config=templatized_config)
 
 
@@ -307,30 +309,41 @@ def generate_assetchains_conf(ctx, branch, asset):
             templatize(assetchain_key)
 
 
-@click.command('sendmany_assetchains', short_help='WIP - Sendmany to one or many assetchains')
+@click.command('importprivkey', short_help='Importprivkey into assetchains')
 @click.option('-b', '--branch', required=True, type=click.Choice(['development', 'production',
     'test']))
 @click.option('-a', '--asset', required=False)
+@click.option('-h', '--rpchost', prompt=True, hide_input=False, confirmation_prompt=False,
+        help='RPC host')
+@click.option('-u', '--rpcuser', prompt=True, hide_input=False, confirmation_prompt=False,
+        help='RPC username')
+@click.option('-r', '--rpcpassword', prompt=True, hide_input=False, confirmation_prompt=False,
+        help='RPC password')
+@click.option('-k', '--btcdprivkey', prompt=True, hide_input=True, confirmation_prompt=True,
+        help='BTCD privkey')
 @pass_config
-def sendmany_assetchains(ctx, branch, asset):
+def importprivkey(ctx, branch, asset, rpchost, rpcuser, rpcpassword, btcdprivkey):
 
-    counter = 0
-    while counter < float(ctx.number_of_requests):
-        # click.echo(ctx.config_data['assetchains'][branch])
-        for assetchain_name in ctx.config_data['assetchains'][branch]:
-            method = 'sendmany'("", ctx.sendtomany_recipients)
-            # click.echo(type(assetchain_name))
-            rpc_port = ctx.config_data['assetchains'][branch][assetchain_name]['rpc_port']
-            if asset and asset == assetchain_name:
-                click.echo('Sending request to: {}'.format(assetchain_name))
-                send_request(assetchain_name, rpc_port, method)
-            elif asset:
-                pass
-            else:
-                click.echo('Sending request to: {}'.format(assetchain_name))
-                send_request(assetchain_name, rpc_port, method)
-        counter += 1
-        sleep(ctx.delay_between_requests)
+    coins = branch + '_coins_assets'
+    for assetchain_key in ctx.assetchains[coins].split(', '):
+        # method = 'importprivkey' + '(privkey=' + btcdprivkey + ' , rescan=False)'
+        rpcport = int(ctx.new_config_data['assetchains'][assetchain_key]['iguana_payload']['rpc'])
+        click.echo(ctx.new_config_data['assetchains'][assetchain_key]['iguana_payload']['rpc'])
+        rpc = send_request(rpc_host=rpchost, rpc_port=rpcport, rpc_user=rpcuser,
+            rpc_password=rpcpassword)
+
+        if asset and asset == assetchain_key:
+            click.echo('Sending request to: {}'.format(assetchain_key))
+            # send_request(assetchain_name, rpc_port, method)
+            click.echo(rpc.importprivkey(btcdprivkey, '', False))
+        elif asset:
+            pass
+        else:
+            click.echo('Sending request to: {}'.format(assetchain_key))
+            click.echo(rpc.importprivkey(btcdprivkey, '', False))
+            # send_request(assetchain_name, rpc_port, method)
+            # click.echo(rpc.getinfo())
+        sleep(1)
 
 
 @click.command('start_iguana', short_help='Add all methods into iguana')
@@ -411,7 +424,7 @@ cli.add_command(generate_docker_compose)
 cli.add_command(generate_new_docker_compose)
 cli.add_command(assetchains)
 cli.add_command(generate_assetchains_conf)
-cli.add_command(sendmany_assetchains)
+cli.add_command(importprivkey)
 cli.add_command(start_iguana)
 
 
