@@ -13,7 +13,7 @@ services:
       - "127.0.0.1:{{ asset.iguana_payload.rpc }}:{{ asset.iguana_payload.rpc }}"
       {% endif %}
       {% if asset.iguana_payload.p2p %}
-      - "{{ asset.iguana_payload.p2p }}:{{ asset.iguana_payload.p2p }}"
+      - "127.0.0.1:{{ asset.iguana_payload.p2p }}:{{ asset.iguana_payload.p2p }}"
       {% endif %}
     volumes:
       - komodo-data:/home/komodo/.komodo
