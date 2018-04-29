@@ -149,6 +149,8 @@ class Config(object):
         self.delay_asset = float(self.assetchains['delay_asset'])
         self.rpc_username = self.assetchains['rpc_username']
         self.rpc_password = self.assetchains['rpc_password']
+        self.rpc_bind = self.assetchains['rpc_bind']
+        self.rpc_allowip = self.assetchains['rpc_allowip']
         self.write_path_conf = self.assetchains['write_path_conf']
         self.iguana = ini_parser['IGUANA']
         self.production_coins = self.iguana['production_coins']
@@ -285,6 +287,8 @@ def generate_assetchains_conf(ctx, branch, asset):
         asset_templatized_config = asset_template.render(
             rpcuser=ctx.rpc_username,
             rpcpassword=ctx.rpc_password,
+            rpcbind=ctx.rpc_bind,
+            rpcallowip=ctx.rpc_allowip,
             # rpcport=ctx.config_data['assetchains'][branch][assetchain_name]['rpc_port'],
             rpcport=ctx.new_config_data['assetchains'][assetchain_name]['iguana_payload'][
                 'rpc'],
@@ -350,23 +354,30 @@ def importprivkey(ctx, branch, asset, rpchost, rpcuser, rpcpassword, btcdprivkey
 @click.option('-b', '--branch', required=True, type=click.Choice(['development', 'production']))
 @click.option('-a', '--asset', required=False, help='name of assetchain in capital \
     letters e.g. SUPERNET')
-@click.option('-p', '--password', prompt=True, hide_input=True,
-    confirmation_prompt=True, help='iguana passphrase')
+@click.option('-p', '--password', prompt=True, hide_input=True, confirmation_prompt=True,
+        help='iguana passphrase')
+@click.option('-m', '--myip', required=False, prompt=True, hide_input=False,
+        confirmation_prompt=False, help='provide public IP of your NN if run via SSH session')
 @pass_config
-def start_iguana(ctx, branch, asset, password):
+def start_iguana(ctx, branch, asset, password, myip):
     url = ctx.iguana_url
     # No authentication is needed for iguana
     auth = ('', '')
 
     # My IP
-    # get public IP address of this host
-    myip = 'http://' + ctx.new_config_data['check_my_ip']
-    response = get_rpc(myip).rstrip()
+    if myip:
+        response = myip
+    else:
+        # get public IP address of this host
+        myip = 'http://' + ctx.new_config_data['check_my_ip']
+        response = get_rpc(myip).rstrip()
+
     click.echo('My IP address is: {}'.format(response))
     myipmethod = ctx.new_config_data['misc_methods']['supernet_myip']
     myipmethod['ipaddr'] = response
     # click.echo('MY IP method: {}'.format(myipmethod))
     post_rpc(url, myipmethod, auth)
+    sleep(3)
 
     #  Add notaries
     for notary in ctx.new_config_data['misc_methods']['notaries']:
@@ -405,7 +416,7 @@ def start_iguana(ctx, branch, asset, password):
         if asset and asset == assetchain_key:
             click.echo('Sending addcoin request to: {}'.format(assetchain_key))
             post_rpc(url, payload, auth)
-            sleep(3)
+            # sleep(3)
             click.echo('Sending dpow {} request to: {}'.format(dpow, assetchain_key))
             post_rpc(url, dpow, auth)
         elif asset:
@@ -413,10 +424,10 @@ def start_iguana(ctx, branch, asset, password):
         else:
             click.echo('Sending addcoin request to: {}'.format(assetchain_key))
             post_rpc(url, payload, auth)
-            sleep(10)
+            # sleep(10)
             click.echo('Sending dpow {} request to: {}'.format(dpow, assetchain_key))
             post_rpc(url, dpow, auth)
-            sleep(10)
+            # sleep(10)
 
 
 # Add functions into cli() function which is main group for all commands
