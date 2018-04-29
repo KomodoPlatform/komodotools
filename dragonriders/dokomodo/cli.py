@@ -287,7 +287,8 @@ def generate_assetchains_conf(ctx, branch, asset):
         asset_templatized_config = asset_template.render(
             rpcuser=ctx.rpc_username,
             rpcpassword=ctx.rpc_password,
-            rpcbind=ctx.rpc_bind,
+            # rpcbind=ctx.rpc_bind,
+            rpcbind=assetchain_name,
             rpcallowip=ctx.rpc_allowip,
             # rpcport=ctx.config_data['assetchains'][branch][assetchain_name]['rpc_port'],
             rpcport=ctx.new_config_data['assetchains'][assetchain_name]['iguana_payload'][
