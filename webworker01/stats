@@ -55,9 +55,9 @@ outputstats ()
     printf "$format" "-ASSET-" "-NTRZd-" "-UTXO-" "-BLOX-" "-BALANCE-" "-LAST-" "-CNCT-";
     
     btctxinfo=$(bitcoin-cli listtransactions "" $txscanamount)
-    btclastntrztime=$(echo $btctxinfo | jq -r --arg address "$btcntrzaddr" '[.[] | select(.address==$address)] | last | "\(.time)"')
+    btclastntrztime=$(echo $btctxinfo | jq -r --arg address "$btcntrzaddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
     printf "$format" "BTC" \
-            "$(bitcoin-cli listtransactions "" $txscanamount | grep $btcntrzaddr | wc -l)" \
+            "$(echo $btctxinfo | grep $btcntrzaddr | wc -l)" \
             "$(bitcoin-cli listunspent | grep $utxoamt | wc -l)" \
             "$(bitcoin-cli getblockchaininfo | awk ' /\"blocks\"/ {printf $2}' | sed 's/,//')" \
             "$(bitcoin-cli getbalance)" \
@@ -67,9 +67,9 @@ outputstats ()
     kmdinfo=$(komodo-cli getinfo)
     kmdmininginfo=$(komodo-cli getmininginfo)
     kmdtxinfo=$(komodo-cli listtransactions "" $txscanamount)
-    kmdlastntrztime=$(echo $kmdtxinfo | jq -r --arg address "$kmdntrzaddr" '[.[] | select(.address==$address)] | last | "\(.time)"')
+    kmdlastntrztime=$(echo $kmdtxinfo | jq -r --arg address "$kmdntrzaddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
     printf "$format" "KMD" \
-            "$(komodo-cli listtransactions "" $txscanamount | grep $kmdntrzaddr | wc -l)" \
+            "$(echo $kmdtxinfo | grep $kmdntrzaddr | wc -l)" \
             "$(komodo-cli listunspent | grep $utxoamt | wc -l)" \
             "$(echo $kmdinfo | awk ' /\"blocks\"/ {printf $2}' | sed 's/,//')" \
             "$(echo $kmdinfo | awk ' /\"balance\"/ {printf $2}' | sed 's/,//')" \
@@ -79,9 +79,9 @@ outputstats ()
 
     chipsinfo=$(chips-cli getinfo)
     chipstxinfo=$(chips-cli listtransactions "" $txscanamount)
-    chipslastntrztime=$(echo $chipstxinfo | jq -r --arg address "$kmdntrzaddr" '[.[] | select(.address==$address)] | last | "\(.time)"')
+    chipslastntrztime=$(echo $chipstxinfo | jq -r --arg address "$kmdntrzaddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
     printf "$format" "CHIPS" \
-            "$(chips-cli listtransactions "" $txscanamount | grep $kmdntrzaddr | wc -l)" \
+            "$(echo $chipstxinfo | grep $kmdntrzaddr | wc -l)" \
             "$(chips-cli listunspent | grep $utxoamt | wc -l)" \
             "$(echo $chipsinfo | awk ' /\"blocks\"/ {printf $2}' | sed 's/,//')" \
             "$(echo $chipsinfo | awk ' /\"balance\"/ {printf $2}' | sed 's/,//')" \
@@ -100,7 +100,7 @@ outputstats ()
             info=$(komodo-cli -ac_name=$name getinfo)
             mininginfo=$(komodo-cli -ac_name=$name getmininginfo)
             txinfo=$(komodo-cli -ac_name=$name listtransactions "" $txscanamount)
-            lastntrztime=$(echo $txinfo | jq -r --arg address "$kmdntrzaddr" '[.[] | select(.address==$address)] | last | "\(.time)"')
+            lastntrztime=$(echo $txinfo | jq -r --arg address "$kmdntrzaddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
             printf "$format" "$name" \
                     "$(echo $txinfo | grep $kmdntrzaddr | wc -l)" \
                     "$(komodo-cli -ac_name=$name listunspent | grep $utxoamt | wc -l)" \
