@@ -2,6 +2,7 @@
 cd ~
 git clone https://github.com/jl777/chips3.git
 cd chips3/
+git checkout dev
 
 #Build Berkly DB 4.8
 CHIPS_ROOT=$(pwd)
