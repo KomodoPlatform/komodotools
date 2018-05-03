@@ -1,12 +1,15 @@
 #!/bin/bash
 
+#==Options Only Change These==
 #Seconds in display loop, change to false if you don't want it to loop
 sleepytime=600
 
 #How many transactions back to scan for notarizations
 txscanamount=10000
+#==End Options==
 
-#Don't change below unless you know
+
+#Don't change below (incl the addresses!)
 IFS=
 source coinlist
 utxoamt=0.00010000
