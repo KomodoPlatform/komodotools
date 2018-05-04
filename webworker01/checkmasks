@@ -1,0 +1,44 @@
+#!/bin/bash
+
+#Running with no parameter will give a summary
+#./checkmasks all - will output detail for each node
+#./checkmasks <maskhex> - will output detail for a specific mask
+
+#set this to your nodes name
+mynode="webworker01_NA"
+
+if [[ ! -z $1 ]]
+then
+    if [[ "$1" == "all" ]]
+    then
+        curl -s --url "http://127.0.0.1:7776" --data "{\"agent\":\"dpow\",\"method\":\"active\"}" | jq  -c -r .[]
+    else
+        curl -s --url "http://127.0.0.1:7776" --data "{\"agent\":\"dpow\",\"method\":\"active\",\"maskhex\":\"$1\"}" | jq  -c -r .
+    fi
+else
+    bestmaskdata=$(curl -s --url "http://127.0.0.1:7776" --data "{\"agent\":\"dpow\",\"method\":\"active\"}")
+
+    seedrecvmask=$(echo $bestmaskdata | jq -c '.[1] | .recvmask' | sed 's/"//g' | awk '{$1=$1};1')
+    echo "Seed recvmask: $seedrecvmask"
+    curl -s --url "http://127.0.0.1:7776" --data "{\"agent\":\"dpow\",\"method\":\"active\",\"maskhex\":\"$seedrecvmask\"}" | jq -c -r '. | del(.maskhex) | del(.tag) | .set' 
+    echo "not:"
+    curl -s --url "http://127.0.0.1:7776" --data "{\"agent\":\"dpow\",\"method\":\"active\",\"maskhex\":\"$seedrecvmask\"}" | jq -c -r '. | del(.maskhex) | del(.tag) | .not' 
+
+    myrecvmask=$(echo $bestmaskdata | jq -c --arg nodename "$mynode" '.[] | select(.notary==$nodename) | .recvmask' | sed 's/"//g' | awk '{$1=$1};1')
+    echo
+    echo "My recvmask: $myrecvmask"
+    curl -s --url "http://127.0.0.1:7776" --data "{\"agent\":\"dpow\",\"method\":\"active\",\"maskhex\":\"$myrecvmask\"}" | jq -c -r '.set'
+
+    bestmask=$(echo $bestmaskdata | jq -c 'group_by(.bestmask) | del(.[] | select(.[0].bestmask == "               0" )) | del(.[] | select(.[0].bestmask == " 0" )) | map ({ "total":length, "bestmask":.[0].bestmask }) | sort_by(.total) | reverse')
+    bestmaskmask=$(echo $bestmask | jq .[0].bestmask | sed 's/"//g' | awk '{$1=$1};1')
+    bestmaskcount=$(echo $bestmask | jq .[0].total | sed 's/"//g')
+
+    echo
+    echo "Best bestmask: $bestmaskmask [$bestmaskcount agree]"
+    curl -s --url "http://127.0.0.1:7776" --data "{\"agent\":\"dpow\",\"method\":\"active\",\"maskhex\":\"$bestmaskmask\"}" | jq -c -r '.set'
+
+    mybestmask=$(echo $bestmaskdata | jq -c --arg nodename "$mynode" '.[] | select(.notary==$nodename) | .bestmask' | sed 's/"//g' | awk '{$1=$1};1')
+    echo
+    echo "My bestmask: $mybestmask"
+    curl -s --url "http://127.0.0.1:7776" --data "{\"agent\":\"dpow\",\"method\":\"active\",\"maskhex\":\"$mybestmask\"}" | jq -c -r '.set'
+fi
