@@ -6,7 +6,7 @@
 sleepytime=600
 
 #How many transactions back to scan for notarizations
-txscanamount=10000
+txscanamount=77777
 
 #Only count tx after this timestamp (currently set for block 814000)
 timefilter=1525032458
