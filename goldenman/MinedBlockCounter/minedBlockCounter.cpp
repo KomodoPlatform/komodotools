@@ -22,6 +22,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <time.h>
 
 using namespace std;
 
@@ -33,6 +34,13 @@ struct sortMapByValue {
     }
 };
 */
+
+struct Block
+{
+    int height;
+    int blockTime;
+    double amount;
+};
 
 string myExec(const char* cmd) {
     char buffer[512];
@@ -66,6 +74,19 @@ int getHeight(string hash) {
     return height;
 }
 
+string getTimeStr(int timestamp) {
+    time_t rawtime = timestamp;
+    struct tm * timeinfo;
+    char buffer [80];
+
+    //time (&rawtime);
+    timeinfo = localtime (&rawtime);
+
+    strftime (buffer,80,"%F %R",timeinfo);
+   
+    return buffer;
+}
+
 int main() {
 
     Json::Reader reader;
@@ -82,14 +103,14 @@ int main() {
     double total = 0;
     int lastBlock = getHeight(obj["lastblock"].asString());
 
-    map<int, double> my_map; // height, amount
+    map<int, Block> my_map; // height, amount
     
     cout << fixed;
     cout.precision(8);
     
-    cout << "---------------------------------------------" << endl;
-    cout << "num\t" << "Height\t" << "Amount" << endl;
-    cout << "---------------------------------------------" << endl;
+    cout << "--------------------------------------------------------" << endl;
+    cout << "num\t" << "Amount\t\t" << "Height" << "\t\tTime Interval(M)" << endl;
+    cout << "--------------------------------------------------------" << endl;
     
     for (i=0; i< size; i++)
     {
@@ -100,31 +121,64 @@ int main() {
 
         double amountIn = obj["transactions"][i]["amount"].asDouble();;
         string hash = obj["transactions"][i]["blockhash"].asString();
-        int height = getHeight(hash);
-
-        my_map[height] = amountIn;
+        int time = obj["transactions"][i]["blocktime"].asInt();
         
-        //cout << j << " - blockHash : " << hash << "\tAmount : " << amountIn << endl;
-        //cout << j << "\t" << height << "\t" << amountIn << endl;
-            
+        int height = getHeight(hash);
+        
+        Block blockinfo;
+        blockinfo.height = height;
+        blockinfo.amount = amountIn;
+        blockinfo.blockTime = time;
+
+        my_map[height] = blockinfo;
+        
         total += amountIn;
         j++;
     }
 
-    vector<pair<int, double> > my_vector(my_map.begin(), my_map.end()); // height, amount
+    vector<pair<int, Block> > my_vector(my_map.begin(), my_map.end()); // height, amount
     //sort(my_vector.begin(), my_vector.end(), sortMapByValue<less>());    
     
+    int sumTime = 0;
+    
     for (i=0; i < j; i++) {
-        cout << i+1 << "\t" << my_vector[i].first << "\t" <<  my_vector[i].second << endl;
+        Block block = my_vector[i].second;
+        double amount = block.amount;
+        
+        if (i > 0) {
+            int sub = my_vector[i].first - my_vector[i-1].first;
+            Block prevBlock = my_vector[i-1].second;
+            int timesub = (block.blockTime - prevBlock.blockTime) / 60;
+            sumTime += timesub;
+            //string time = getTimeStr(timesub);
+            cout << i+1 << "\t" << amount << "\t" <<  my_vector[i].first << " (+" << sub << ")\t" << timesub << endl;
+
+        } else {
+            cout << i+1 << "\t" << amount << "\t" <<  my_vector[i].first << "\t-----" << endl;
+        }
     }
 
     int average = (my_vector[j-2].first - my_vector[0].first) / (j-1);
     int nextTarget = my_vector[j-1].first + average;
     
-    cout << "---------------------------------------------" << endl;
-    cout << "Total : " << total << " KMD" << endl;
-    cout << "Est next block : " << nextTarget << " (avr: +" << average << ")" <<endl;
-    cout << "Cur last block : " << lastBlock << " (" << nextTarget - lastBlock << " left)" << endl;
-    cout << "---------------------------------------------" << endl;
+    int now = time(NULL);
+    Block lastblock = my_vector[j-1].second;
+    int last = lastblock.blockTime;
+    double minedPerHour = total / sumTime * 60;
+    
+    cout << "--------------------------------------------------------" << endl;
+    cout << "Total : " << total << " KMD" << " (avrg interval : " << average << ")" << endl;
+    cout << "--------------------------------------------------------" << endl;
+    cout << "Cur last block : " << lastBlock <<  endl;
+    cout << "Est next block : " << nextTarget << " (" << nextTarget - lastBlock << " left)" << endl;
+    cout << "--------------------------------------------------------" << endl;
+    cout << "Time mined : " << getTimeStr(last) <<  " (-" << (now-last)/60 << " mins)" << endl;
+    cout << "Time curr  : " << getTimeStr(now) << endl;
+    cout << "--------------------------------------------------------" << endl;
+    cout << "Mined per Hour : " << minedPerHour << " KMD" << endl;
+    cout << "Mined per Day  : " << minedPerHour * 24 << " KMD" << endl;
+    cout << "--------------------------------------------------------" << endl;
+    
     return 1;
 }
+
