@@ -9,7 +9,9 @@ sleepytime=600
 txscanamount=77777
 
 #Only count tx after this timestamp (currently set for block 814000)
-timefilter=1525032458
+#timefilter=1525032458
+#Second time filter for assetchains (SuperNET commit 07515fb)
+timefilter=1525513998
 
 #You can modify this list of ACs to exclude or comment out the line to show all
 ignoreacs=('VOTE2018' 'BEER' 'PIZZA')
@@ -86,7 +88,7 @@ outputstats ()
     kmdlastntrztime=$(echo $kmdtxinfo | jq -r --arg address "$kmdntrzaddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
     kmdntrzd=$(echo $kmdtxinfo | jq --arg address "$kmdntrzaddr" --arg timefilter $timefilter '[.[] | select(.time>=($timefilter|tonumber) and .address==$address and .category=="send")] | length')
     totalntrzd=$(( $totalntrzd + $kmdntrzd ))
-    printf "$format" "KMD" \
+    printf "%-8s %7s %6s %7s %12.4f %8s %7s %7s\n" "KMD" \
             "$kmdntrzd" \
             "$(komodo-cli listunspent | grep $utxoamt | wc -l)" \
             "$(echo $kmdinfo | awk ' /\"blocks\"/ {printf $2}' | sed 's/,//')" \
