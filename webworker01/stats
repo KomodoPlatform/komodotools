@@ -8,10 +8,10 @@ sleepytime=600
 #How many transactions back to scan for notarizations
 txscanamount=77777
 
-#Only count tx after this timestamp (currently set for block 814000)
-#timefilter=1525032458
+#Only count KMD->BTC after this timestamp (block 814000)
+timefilter=1525032458
 #Second time filter for assetchains (SuperNET commit 07515fb)
-timefilter=1525513998
+timefilter2=1525513998
 
 #You can modify this list of ACs to exclude or comment out the line to show all
 ignoreacs=('VOTE2018' 'BEER' 'PIZZA')
@@ -86,10 +86,8 @@ outputstats ()
     kmdmininginfo=$(komodo-cli getmininginfo)
     kmdtxinfo=$(komodo-cli listtransactions "" $txscanamount)
     kmdlastntrztime=$(echo $kmdtxinfo | jq -r --arg address "$kmdntrzaddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
-    kmdntrzd=$(echo $kmdtxinfo | jq --arg address "$kmdntrzaddr" --arg timefilter $timefilter '[.[] | select(.time>=($timefilter|tonumber) and .address==$address and .category=="send")] | length')
-    totalntrzd=$(( $totalntrzd + $kmdntrzd ))
-    printf "%-8s %7s %6s %7s %12.4f %8s %7s %7s\n" "KMD" \
-            "$kmdntrzd" \
+    printf "%-8s %7s %6s %7s %.12s %8s %7s %7s\n" "KMD" \
+            " " \
             "$(komodo-cli listunspent | grep $utxoamt | wc -l)" \
             "$(echo $kmdinfo | awk ' /\"blocks\"/ {printf $2}' | sed 's/,//')" \
             "$(echo $kmdinfo | awk ' /\"balance\"/ {printf $2}' | sed 's/,//')" \
@@ -100,7 +98,7 @@ outputstats ()
     chipsinfo=$(chips-cli getinfo)
     chipstxinfo=$(chips-cli listtransactions "" $txscanamount)
     chipslastntrztime=$(echo $chipstxinfo | jq -r --arg address "$kmdntrzaddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
-    chipsntrzd=$(echo $chipstxinfo | jq --arg address "$kmdntrzaddr" --arg timefilter $timefilter '[.[] | select(.time>=($timefilter|tonumber) and .address==$address and .category=="send")] | length')
+    chipsntrzd=$(echo $chipstxinfo | jq --arg address "$kmdntrzaddr" --arg timefilter $timefilter2 '[.[] | select(.time>=($timefilter|tonumber) and .address==$address and .category=="send")] | length')
     totalntrzd=$(( $totalntrzd + $chipsntrzd ))
     printf "$format" "CHIPS" \
             "$chipsntrzd" \
@@ -120,7 +118,7 @@ outputstats ()
             mininginfo=$(komodo-cli -ac_name=$name getmininginfo)
             txinfo=$(komodo-cli -ac_name=$name listtransactions "" $txscanamount)
             lastntrztime=$(echo $txinfo | jq -r --arg address "$kmdntrzaddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
-            acntrzd=$(echo $txinfo | jq --arg address "$kmdntrzaddr" --arg timefilter $timefilter '[.[] | select(.time>=($timefilter|tonumber) and .address==$address and .category=="send")] | length')
+            acntrzd=$(echo $txinfo | jq --arg address "$kmdntrzaddr" --arg timefilter $timefilter2 '[.[] | select(.time>=($timefilter|tonumber) and .address==$address and .category=="send")] | length')
             totalntrzd=$(( $totalntrzd + $acntrzd ))
             printf "$format" "$name" \
                     "$acntrzd" \
