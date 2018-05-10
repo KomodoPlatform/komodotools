@@ -54,12 +54,12 @@ timeSince()
 #Do not change for any reason! 
 #The BTC and KMD address here must remain the same. Do not need to enter yours!
 source coinlist
-utxoamt=0.00010000
+utxoamt="0.00010000"
 ntrzdamt=-0.00083600
 btcntrzaddr=1P3rU1Nk1pmc2BiWC8dEy9bZa1ZbMp5jfg
 kmdntrzaddr=RXL3YXG2ceaB6C5hfJcN4fvmLH2C34knhA
 
-format="%-8s %7s %6s %7s %12s %8s %7s %7s\n"
+format="%-8s %7s %6s %7s %12.8f %8s %7s %7s\n"
 
 outputstats ()
 {
@@ -68,7 +68,7 @@ outputstats ()
     now=$(date +"%Y-%m-%d %T%z")
 
     printf "\n\n"
-    printf "$format" "-ASSET-" "-NTRZd-" "-UTXO-" "-BLOX-" "-BALANCE-" "-LAST-" "-CNCT-";
+    printf "%-8s %7s %6s %7s %12s %8s %7s %7s\n" "-ASSET-" "-NTRZd-" "-UTXO-" "-BLOX-" "-BALANCE-" "-LAST-" "-CNCT-";
 
     btctxinfo=$(bitcoin-cli listtransactions "" $txscanamount)
     btclastntrztime=$(echo $btctxinfo | jq -r --arg address "$btcntrzaddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
@@ -76,11 +76,11 @@ outputstats ()
     totalntrzd=$(( $totalntrzd + $btcntrzd ))
     printf "$format" "BTC" \
             "$btcntrzd" \
-            "$(bitcoin-cli listunspent | grep $utxoamt | wc -l)" \
-            "$(bitcoin-cli getblockchaininfo | awk ' /\"blocks\"/ {printf $2}' | sed 's/,//')" \
+            "$(bitcoin-cli listunspent | jq --arg amt "$utxoamt" '[.[] | select(.amount==($amt|tonumber))] | length')" \
+            "$(bitcoin-cli getblockchaininfo | jq .blocks)" \
             "$(bitcoin-cli getbalance)" \
             "$(timeSince $btclastntrztime)" \
-            "$(bitcoin-cli getnetworkinfo | awk ' /\"connections\"/ {printf $2}' | sed 's/,//')"
+            "$(bitcoin-cli getnetworkinfo | jq .connections)"
 
     kmdinfo=$(komodo-cli getinfo)
     kmdmininginfo=$(komodo-cli getmininginfo)
@@ -88,11 +88,11 @@ outputstats ()
     kmdlastntrztime=$(echo $kmdtxinfo | jq -r --arg address "$kmdntrzaddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
     printf "%-8s %7s %6s %7s %.12s %8s %7s %7s\n" "KMD" \
             " " \
-            "$(komodo-cli listunspent | grep $utxoamt | wc -l)" \
-            "$(echo $kmdinfo | awk ' /\"blocks\"/ {printf $2}' | sed 's/,//')" \
-            "$(echo $kmdinfo | awk ' /\"balance\"/ {printf $2}' | sed 's/,//')" \
+            "$(komodo-cli listunspent | jq --arg amt "$utxoamt" '[.[] | select(.amount==($amt|tonumber))] | length')" \
+            "$(echo $kmdinfo | jq .blocks)" \
+            "$(echo $kmdinfo | jq .balance)" \
             "$(timeSince $kmdlastntrztime)" \
-            "$(echo $kmdinfo | awk ' /\"connections\"/ {printf $2}' | sed 's/,//')" \
+            "$(echo $kmdinfo | jq .connections)" \
             "$(echo $kmdtxinfo | grep '\"generated\": true,' | wc -l) mined"
 
     chipsinfo=$(chips-cli getinfo)
@@ -102,11 +102,11 @@ outputstats ()
     totalntrzd=$(( $totalntrzd + $chipsntrzd ))
     printf "$format" "CHIPS" \
             "$chipsntrzd" \
-            "$(chips-cli listunspent | grep $utxoamt | wc -l)" \
-            "$(echo $chipsinfo | awk ' /\"blocks\"/ {printf $2}' | sed 's/,//')" \
-            "$(echo $chipsinfo | awk ' /\"balance\"/ {printf $2}' | sed 's/,//')" \
+            "$(chips-cli listunspent | jq --arg amt "$utxoamt" '[.[] | select(.amount==($amt|tonumber))] | length')" \
+            "$(echo $chipsinfo | jq .blocks)" \
+            "$(echo $chipsinfo | jq -r '. | (.balance|tostring)')" \
             "$(timeSince $chipslastntrztime)" \
-            "$(echo $chipsinfo | awk ' /\"connections\"/ {printf $2}' | sed 's/,//')"
+            "$(echo $chipsinfo | jq .connections)"
 
     while [[ $count -le ${#coinlist[@]} ]]
     do
@@ -122,11 +122,11 @@ outputstats ()
             totalntrzd=$(( $totalntrzd + $acntrzd ))
             printf "$format" "$name" \
                     "$acntrzd" \
-                    "$(komodo-cli -ac_name=$name listunspent | grep $utxoamt | wc -l)" \
-                    "$(echo $info | awk ' /\"blocks\"/ {printf $2}' | sed 's/,//')" \
-                    "$(echo $info | awk ' /\"balance\"/ {printf $2}' | sed 's/,//')" \
+                    "$(komodo-cli -ac_name=$name listunspent | jq --arg amt "$utxoamt" '[.[] | select(.amount==($amt|tonumber))] | length')" \
+                    "$(echo $info | jq .blocks)" \
+                    "$(echo $info | jq .balance)" \
                     "$(timeSince $lastntrztime)" \
-                    "$(echo $info | awk ' /\"connections\"/ {printf $2}' | sed 's/,//')"
+                    "$(echo $info | jq .connections)"
         fi
         count=$(( $count +1 ))
     done
