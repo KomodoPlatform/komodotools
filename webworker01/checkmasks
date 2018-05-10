@@ -4,6 +4,9 @@
 #./checkmasks all - will output detail for each node
 #./checkmasks <maskhex> - will output detail for a specific mask
 
+#which notaryid to use as "seednode" reference starting at 0 to 63
+seednode=1
+
 if [[ ! -z $1 ]]
 then
     if [[ "$1" == "all" ]]
@@ -17,7 +20,7 @@ else
 
     bestmaskdata=$(curl -s --url "http://127.0.0.1:7776" --data "{\"agent\":\"dpow\",\"method\":\"active\"}")
 
-    seedrecvmask=$(echo $bestmaskdata | jq -c '.[1] | .recvmask' | sed 's/"//g' | awk '{$1=$1};1')
+    seedrecvmask=$(echo $bestmaskdata | jq --arg seedid $seednode '.[$seedid|tonumber] | .recvmask' | sed 's/"//g' | awk '{$1=$1};1')
     echo "Seed recvmask: $seedrecvmask"
     curl -s --url "http://127.0.0.1:7776" --data "{\"agent\":\"dpow\",\"method\":\"active\",\"maskhex\":\"$seedrecvmask\"}" | jq -c -r '. | del(.maskhex) | del(.tag) | .set' 
     echo "not:"
