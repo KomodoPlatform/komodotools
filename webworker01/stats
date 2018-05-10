@@ -51,7 +51,7 @@ timeSince()
 #Do not change for any reason! 
 #The BTC and KMD address here must remain the same. Do not need to enter yours!
 source coinlist
-utxoamt="0.00010000"
+utxoamt=0.00010000
 ntrzdamt=-0.00083600
 btcntrzaddr=1P3rU1Nk1pmc2BiWC8dEy9bZa1ZbMp5jfg
 kmdntrzaddr=RXL3YXG2ceaB6C5hfJcN4fvmLH2C34knhA
