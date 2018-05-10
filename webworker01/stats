@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#Requires jq v1.5+ and bitcoin-cli, komodo-cli and chips-cli installed (e.g. symlinked to /usr/local/bin)
+
 #==Options - Only Change These==
 
 #Seconds in display loop, change to false if you don't want it to loop
