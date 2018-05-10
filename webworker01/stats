@@ -84,7 +84,6 @@ outputstats ()
             "$(bitcoin-cli getnetworkinfo | jq .connections)"
 
     kmdinfo=$(komodo-cli getinfo)
-    kmdmininginfo=$(komodo-cli getmininginfo)
     kmdtxinfo=$(komodo-cli listtransactions "" $txscanamount)
     kmdlastntrztime=$(echo $kmdtxinfo | jq -r --arg address "$kmdntrzaddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
     printf "%-8s %7s %6s %7s %.12s %8s %7s %7s\n" "KMD" \
@@ -94,7 +93,7 @@ outputstats ()
             "$(echo $kmdinfo | jq .balance)" \
             "$(timeSince $kmdlastntrztime)" \
             "$(echo $kmdinfo | jq .connections)" \
-            "$(echo $kmdtxinfo | grep '\"generated\": true,' | wc -l) mined"
+            "$(echo $kmdtxinfo | jq '[.[] | select(.generated==true)] | length') mined"
 
     chipsinfo=$(chips-cli getinfo)
     chipstxinfo=$(chips-cli listtransactions "" $txscanamount)
