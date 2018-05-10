@@ -6,7 +6,7 @@ sudo ufw default deny incoming
 sudo ufw allow 22    comment 'SSH'
 sudo ufw allow 7770  comment 'KMD'
 sudo ufw allow 17775 comment 'Iguana Notary'
-sudo ufw allow 8333  comment 'BTC'
+#sudo ufw allow 8333  comment 'BTC'
 sudo ufw allow 57777 comment 'CHIPS'
 sudo ufw allow 10195 comment 'REVS'
 sudo ufw allow 11340 comment 'SUPERNET'
