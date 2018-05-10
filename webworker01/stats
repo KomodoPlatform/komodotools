@@ -10,11 +10,6 @@ sleepytime=600
 #How many transactions back to scan for notarizations
 txscanamount=77777
 
-#Only count KMD->BTC after this timestamp (block 814000)
-timefilter=1525032458
-#Second time filter for assetchains (SuperNET commit 07515fb)
-timefilter2=1525513998
-
 #You can modify this list of ACs to exclude or comment out the line to show all
 ignoreacs=('VOTE2018' 'BEER' 'PIZZA')
 
@@ -60,6 +55,10 @@ utxoamt="0.00010000"
 ntrzdamt=-0.00083600
 btcntrzaddr=1P3rU1Nk1pmc2BiWC8dEy9bZa1ZbMp5jfg
 kmdntrzaddr=RXL3YXG2ceaB6C5hfJcN4fvmLH2C34knhA
+#Only count KMD->BTC after this timestamp (block 814000)
+timefilter=1525032458
+#Second time filter for assetchains (SuperNET commit 07515fb)
+timefilter2=1525513998
 
 format="%-8s %7s %6s %7s %12.8f %8s %7s %7s\n"
 
