@@ -108,6 +108,19 @@ outputstats ()
             "$(timeSince $chipslastntrztime)" \
             "$(echo $chipsinfo | jq .connections)"
 
+    gamecreditsinfo=$(gamecredits-cli getinfo)
+    gamecreditstxinfo=$(gamecredits-cli listtransactions "" $txscanamount)
+    gamecreditslastntrztime=$(echo $gamecreditstxinfo | jq -r --arg address "$kmdntrzaddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
+    gamecreditsntrzd=$(echo $gamecreditstxinfo | jq --arg address "$kmdntrzaddr" --arg timefilter $timefilter2 '[.[] | select(.time>=($timefilter|tonumber) and .address==$address and .category=="send")] | length')
+    totalntrzd=$(( $totalntrzd + $gamecreditsntrzd ))
+    printf "$format" "GAME" \
+            "$gamecreditsntrzd" \
+            "$(gamecredits-cli listunspent | jq --arg amt "$utxoamt" '[.[] | select(.amount==($amt|tonumber))] | length')" \
+            "$(echo $gamecreditsinfo | jq .blocks)" \
+            "$(echo $gamecreditsinfo | jq -r '. | (.balance|tostring)')" \
+            "$(timeSince $gamecreditslastntrztime)" \
+            "$(echo $gamecreditsinfo | jq .connections)"
+
     while [[ $count -le ${#coinlist[@]} ]]
     do
         all=${coinlist[count]}
