@@ -1,6 +1,5 @@
 #!/bin/bash
-#Stats script for Komodo Notary Nodes
-#
+
 #Requires jq v1.5+ and bitcoin-cli, komodo-cli and chips-cli installed (e.g. symlinked to /usr/local/bin)
 
 #==Options - Only Change These==
@@ -41,12 +40,12 @@ timeSince()
         fi
         if [[ $d = 0 && $h = 0 && $m = 0 ]]; then
             echo -n "${s}s"
-        fi
+        fi  
 
     fi
 }
 
-#Do not change below for any reason!
+#Do not change below for any reason! 
 #The BTC and KMD address here must remain the same. Do not need to enter yours!
 source coinlist
 utxoamt=0.00010000
@@ -101,14 +100,23 @@ outputstats ()
     for coins in "${othercoins[@]}"; do
         coin=($coins)
 
+        if [[ ${coin[0]} == "GAME" ]]; then
+            coinsutxoamount=0.00100000
+            coinsntraddr=Gftmt8hgzgNu6f1o85HMPuwTVBMSV2TYSt
+        else
+            coinsutxoamount=$utxoamt
+            coinsntraddr=$kmdntrzaddr
+        fi
+
         coinsinfo=$(${coin[1]} getinfo)
         coinstxinfo=$(${coin[1]} listtransactions "" $txscanamount)
-        coinslastntrztime=$(echo $coinstxinfo | jq -r --arg address "$kmdntrzaddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
-        coinsntrzd=$(echo $coinstxinfo | jq --arg address "$kmdntrzaddr" --arg timefilter $timefilter2 '[.[] | select(.time>=($timefilter|tonumber) and .address==$address and .category=="send")] | length')
+        coinslastntrztime=$(echo $coinstxinfo | jq -r --arg address "$coinsntraddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
+        coinsntrzd=$(echo $coinstxinfo | jq --arg address "$coinsntraddr" --arg timefilter $timefilter2 '[.[] | select(.time>=($timefilter|tonumber) and .address==$address and .category=="send")] | length')
         totalntrzd=$(( $totalntrzd + $coinsntrzd ))
+
         printf "$format" "${coin[0]}" \
                 "$coinsntrzd" \
-                "$(${coin[1]} listunspent | jq --arg amt "$utxoamt" '[.[] | select(.amount==($amt|tonumber))] | length')" \
+                "$(${coin[1]} listunspent | jq --arg amt "$coinsutxoamount" '[.[] | select(.amount==($amt|tonumber))] | length')" \
                 "$(echo $coinsinfo | jq .blocks)" \
                 "$(echo $coinsinfo | jq -r '. | (.balance|tostring)')" \
                 "$(timeSince $coinslastntrztime)" \
