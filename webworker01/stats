@@ -1,5 +1,6 @@
 #!/bin/bash
-
+#Stats script for Komodo Notary Nodes
+#
 #Requires jq v1.5+ and bitcoin-cli, komodo-cli and chips-cli installed (e.g. symlinked to /usr/local/bin)
 
 #==Options - Only Change These==
@@ -40,12 +41,12 @@ timeSince()
         fi
         if [[ $d = 0 && $h = 0 && $m = 0 ]]; then
             echo -n "${s}s"
-        fi  
+        fi
 
     fi
 }
 
-#Do not change below for any reason! 
+#Do not change below for any reason!
 #The BTC and KMD address here must remain the same. Do not need to enter yours!
 source coinlist
 utxoamt=0.00010000
