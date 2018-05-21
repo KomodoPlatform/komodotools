@@ -1,0 +1,42 @@
+#!/bin/bash
+
+source coinlist
+forked=false
+
+blocks=$(komodo-cli getinfo | jq .blocks)
+longest=$(komodo-cli getinfo | jq .longestchain)
+
+if ((blocks < longest)); then
+    forked=true
+    printf "\033[0;31mKMD - Possible fork!\033[0m Blocks $blocks < LongestChain $longest\n"
+else
+    echo "KMD - Blocks $blocks = LongestChain $longest"
+fi
+
+blocks=$(chips-cli getinfo | jq .blocks)
+longest=$(chips-cli getinfo | jq .headers)
+
+if ((blocks < longest)); then
+    forked=true
+    printf "\033[0;31mCHIPS - Possible fork!\033[0m Blocks $blocks < Headers $longest\n"
+else
+    echo "CHIPS - Blocks $blocks = Headers $longest"
+fi
+
+for coins in "${coinlist[@]}"; do
+    coin=($coins)
+
+    blocks=$(komodo-cli -ac_name=${coin[0]} getinfo | jq .blocks)
+    longest=$(komodo-cli -ac_name=${coin[0]} getinfo | jq .longestchain)
+    
+    if ((blocks < longest)); then
+        forked=true
+        printf "\033[0;31m${coin[0]} - Possible fork!\033[0m Blocks $blocks < LongestChain $longest\n"
+    else
+        echo "${coin[0]} - Blocks $blocks = LongestChain $longest"
+    fi
+done
+
+if [ "$forked" = false ]; then
+    printf "\033[0;32mAll coins are fine\033[0m\n"
+fi
