@@ -5,7 +5,7 @@ sudo ufw disable
 sudo ufw default deny incoming
 sudo ufw allow 22    comment 'SSH'
 sudo ufw allow 7770  comment 'KMD'
-sudo ufw allow 17775 comment 'Iguana Notary'
+#sudo ufw allow 17775 comment 'Iguana Notary'
 #sudo ufw allow 8333  comment 'BTC'
 sudo ufw allow 57777 comment 'CHIPS'
 sudo ufw allow 10195 comment 'REVS'
@@ -37,6 +37,9 @@ sudo ufw allow 12466 comment 'OOT'
 sudo ufw allow 14357 comment 'BNTN'
 sudo ufw allow 15586 comment 'CHAIN'
 sudo ufw allow 9678  comment 'PRLPAY'
+sudo ufw allow 40002 comment 'GAME'
+sudo ufw allow 15722 comment 'GLXT'
+sudo ufw allow 10305 comment 'EQL'
 sudo ufw enable
 
 # check the status again
