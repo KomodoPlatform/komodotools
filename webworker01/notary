@@ -1,0 +1,2 @@
+cd ~/SuperNET/iguana
+git checkout beta && git pull && ./m_notary && cd ~/komodo/src && ./dpowassets

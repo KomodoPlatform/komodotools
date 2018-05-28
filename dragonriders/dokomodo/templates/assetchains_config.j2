@@ -1,0 +1,13 @@
+rpcuser={% if rpcuser|default('rpcuser') %}{{ rpcuser }}
+{% endif %}
+rpcpassword={% if rpcpassword|default('rpcpassword') %}{{ rpcpassword }}
+{% endif %}
+rpcport={% if rpcport|default('10000') %}{{ rpcport }}
+{% endif %}
+rpcbind={% if rpcbind|default('0.0.0.0') %}{{ rpcbind }}
+{% endif %}
+rpcallowip={% if rpcallowip|default('0.0.0.0/0') %}{{ rpcallowip }}
+{% endif %}
+server=1
+txindex=1
+rpcworkqueue={{ rpcworkqueue|default('64') }}

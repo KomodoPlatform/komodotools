@@ -30,6 +30,12 @@ It was Kolo's idea to create this repository and here is his concept how it shou
 
 ### ansible-playbooks
  - This is demonstration that central yaml file can be used by other tools. I expect people to start using Ansible for system configuration.
+ 
+### dwy
+ - lazynode script : get the status of your node in few commands. Check everything is running fine. Run "allinone". Testing on my test node.
+
+### webworker01
+ - Some general utility scripts
 
 ## Contacts
 Ideas can be discussed in [#notarynode](https://komodo-platform.slack.com) Slack channel, but please all code proposals discuss via PRs on Github.

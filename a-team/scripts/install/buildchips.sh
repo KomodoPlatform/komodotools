@@ -1,6 +1,6 @@
 #Install Chips:
 cd ~
-git clone https://github.com/jl777/chips3.git
+git clone https://github.com/jl777/chips3.git -b dev
 cd chips3/
 git checkout dev
 
