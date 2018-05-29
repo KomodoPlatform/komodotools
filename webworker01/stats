@@ -85,7 +85,7 @@ timefilter=1525032458
 #Second time filter for assetchains (SuperNET commit 07515fb)
 timefilter2=1525513998
 
-format="%-11s %7s %6s %7s %.12s %8s %7s %7s"
+format="%-11s %6s %6s %7s %.12s %6s %6s %6s"
 
 othercoins=(
 'CHIPS chips-cli'
@@ -99,7 +99,7 @@ outputstats ()
     now=$(date +"%H:%M")
 
     printf "\n\n"
-    printf "%-11s %7s %6s %7s %12s %8s %7s %7s\n" "-ASSET-" "-NTRZd-" "-UTXO-" "-BLOX-" "-BALANCE-" "-LAST-" "-CNCT-";
+    printf "%-11s %6s %6s %7s %12s %6s %6s %6s\n" "-ASSET-" "-NOTR-" "-UTXO-" "-BLOX-" "-BALANCE-" "-LAST-" "-CNCT-";
 
     btctxinfo=$(bitcoin-cli listtransactions "" $txscanamount)
     btclastntrztime=$(echo $btctxinfo | jq -r --arg address "$btcntrzaddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
