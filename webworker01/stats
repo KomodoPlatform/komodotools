@@ -1,7 +1,7 @@
 #!/bin/bash
 #Stats script for Komodo Notary Nodes
 #
-#Requires jq v1.5+ and bitcoin-cli, komodo-cli and chips-cli installed (e.g. symlinked to /usr/local/bin)
+#Requires jq v1.5+ and bitcoin-cli, komodo-cli, chips-cli and gamecredits-cli installed (e.g. symlinked to /usr/local/bin)
 
 #==Options - Only Change These==
 
@@ -13,6 +13,14 @@ txscanamount=77777
 
 #You can modify this list of ACs to exclude or comment out the line to show all
 ignoreacs=('VOTE2018' 'BEER' 'PIZZA')
+
+#git checking - some paths and such
+repos=(
+'Komodo $HOME/komodo origin/dev'
+'Iguana $HOME/SuperNET origin/dev'
+'Chips $HOME/chips3 origin/dev'
+'GameCredits /home/gamecredits/GameCredits origin/master'
+)
 
 #==End Options==
 
@@ -44,6 +52,23 @@ timeSince()
         fi
 
     fi
+}
+
+checkRepo()
+{
+    prevdir=${PWD}
+
+    eval cd "$2"
+
+    git remote update > /dev/null 2>&1
+
+    localrev=$(git rev-parse HEAD)
+    remoterev=$(git rev-parse $3)
+
+    if [ $localrev != $remoterev ]; then
+        printf "\n\033[0;31m$1 has an update at $3! Local:${localrev:0:7} Upstream:${remoterev:0:7}\033[0m"
+    fi
+    cd $prevdir
 }
 
 #Do not change below for any reason!
@@ -145,12 +170,15 @@ outputstats ()
         fi
     done
     printf "Total: %9s %44s" "$totalntrzd" "$now";
+
+    for repo in "${repos[@]}"; do
+        checkRepo ${repo[0]} ${repo[1]} ${repo[2]} 
+    done
 }
 
 if [ "$sleepytime" != "false" ]
 then
-    while true
-    do
+    while true; do
         outputstats
         sleep $sleepytime
     done
