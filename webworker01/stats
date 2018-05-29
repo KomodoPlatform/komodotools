@@ -14,13 +14,11 @@ txscanamount=77777
 #You can modify this list of ACs to exclude or comment out the line to show all
 ignoreacs=('VOTE2018' 'BEER' 'PIZZA')
 
-#git checking - some paths and such
-repos=(
-'Komodo $HOME/komodo origin/dev'
-'Iguana $HOME/SuperNET origin/dev'
-'Chips $HOME/chips3 origin/dev'
-'GameCredits /home/gamecredits/GameCredits origin/master'
-)
+#git checking - path and remote branch
+komodorepo=('$HOME/komodo origin/dev')
+iguanarepo=('$HOME/SuperNET origin/dev')
+chipsrepo=('$HOME/chips3 origin/dev')
+gamerepo=('/home/gamecredits/GameCredits origin/master')
 
 #==End Options==
 
@@ -58,17 +56,17 @@ checkRepo()
 {
     prevdir=${PWD}
 
-    eval cd "$2"
+    eval cd "$1"
 
     git remote update > /dev/null 2>&1
 
     localrev=$(git rev-parse HEAD)
-    remoterev=$(git rev-parse $3)
+    remoterev=$(git rev-parse $2)
+    cd $prevdir
 
     if [ $localrev != $remoterev ]; then
-        printf "\n\033[0;31m$1 has an update at $3! Local:${localrev:0:7} Upstream:${remoterev:0:7}\033[0m"
+        printf "\033[0;31m[U]\033[0m"
     fi
-    cd $prevdir
 }
 
 #Do not change below for any reason!
@@ -83,7 +81,7 @@ timefilter=1525032458
 #Second time filter for assetchains (SuperNET commit 07515fb)
 timefilter2=1525513998
 
-format="%-8s %7s %6s %7s %12.8f %8s %7s %7s\n"
+format="%-11s %7s %6s %7s %.12s %8s %7s %7s\n"
 
 othercoins=(
 'CHIPS chips-cli'
@@ -97,7 +95,7 @@ outputstats ()
     now=$(date +"%Y-%m-%d %T%z")
 
     printf "\n\n"
-    printf "%-8s %7s %6s %7s %12s %8s %7s %7s\n" "-ASSET-" "-NTRZd-" "-UTXO-" "-BLOX-" "-BALANCE-" "-LAST-" "-CNCT-";
+    printf "%-11s %7s %6s %7s %12s %8s %7s %7s\n" "-ASSET-" "-NTRZd-" "-UTXO-" "-BLOX-" "-BALANCE-" "-LAST-" "-CNCT-";
 
     btctxinfo=$(bitcoin-cli listtransactions "" $txscanamount)
     btclastntrztime=$(echo $btctxinfo | jq -r --arg address "$btcntrzaddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
@@ -107,18 +105,19 @@ outputstats ()
             "$btcntrzd" \
             "$(bitcoin-cli listunspent | jq --arg amt "$utxoamt" '[.[] | select(.amount==($amt|tonumber))] | length')" \
             "$(bitcoin-cli getblockchaininfo | jq .blocks)" \
-            "$(bitcoin-cli getbalance)" \
+            "$(printf "%12.8f" $(bitcoin-cli getbalance))" \
             "$(timeSince $btclastntrztime)" \
             "$(bitcoin-cli getnetworkinfo | jq .connections)"
 
     kmdinfo=$(komodo-cli getinfo)
     kmdtxinfo=$(komodo-cli listtransactions "" $txscanamount)
     kmdlastntrztime=$(echo $kmdtxinfo | jq -r --arg address "$kmdntrzaddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
-    printf "%-8s %7s %6s %7s %.12s %8s %7s %7s\n" "KMD" \
+
+    printf "$format" "KMD$(checkRepo ${komodorepo[0]} ${komodorepo[1]})" \
             " " \
             "$(komodo-cli listunspent | jq --arg amt "$utxoamt" '[.[] | select(.amount==($amt|tonumber))] | length')" \
             "$(echo $kmdinfo | jq .blocks)" \
-            "$(echo $kmdinfo | jq .balance)" \
+            "$(printf "%12.8f" $(echo $kmdinfo | jq .balance))" \
             "$(timeSince $kmdlastntrztime)" \
             "$(echo $kmdinfo | jq .connections)" \
             "$(echo $kmdtxinfo | jq '[.[] | select(.generated==true)] | length') mined"
@@ -129,9 +128,11 @@ outputstats ()
         if [[ ${coin[0]} == "GAME" ]]; then
             coinsutxoamount=0.00100000
             coinsntraddr=Gftmt8hgzgNu6f1o85HMPuwTVBMSV2TYSt
+            nameoutput="${coin[0]}$(checkRepo ${gamerepo[0]} ${gamerepo[1]})"
         else
             coinsutxoamount=$utxoamt
             coinsntraddr=$kmdntrzaddr
+            nameoutput="${coin[0]}$(checkRepo ${chipsrepo[0]} ${chipsrepo[1]})"
         fi
 
         coinsinfo=$(${coin[1]} getinfo)
@@ -140,11 +141,11 @@ outputstats ()
         coinsntrzd=$(echo $coinstxinfo | jq --arg address "$coinsntraddr" --arg timefilter $timefilter2 '[.[] | select(.time>=($timefilter|tonumber) and .address==$address and .category=="send")] | length')
         totalntrzd=$(( $totalntrzd + $coinsntrzd ))
 
-        printf "$format" "${coin[0]}" \
+        printf "$format" "$nameoutput" \
                 "$coinsntrzd" \
                 "$(${coin[1]} listunspent | jq --arg amt "$coinsutxoamount" '[.[] | select(.amount==($amt|tonumber))] | length')" \
                 "$(echo $coinsinfo | jq .blocks)" \
-                "$(echo $coinsinfo | jq -r '. | (.balance|tostring)')" \
+                "$(printf "%12.8f" $(echo $coinsinfo | jq -r '. | (.balance|tostring)'))" \
                 "$(timeSince $coinslastntrztime)" \
                 "$(echo $coinsinfo | jq .connections)"
     done
@@ -160,20 +161,23 @@ outputstats ()
             lastntrztime=$(echo $txinfo | jq -r --arg address "$kmdntrzaddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
             acntrzd=$(echo $txinfo | jq --arg address "$kmdntrzaddr" --arg timefilter $timefilter2 '[.[] | select(.time>=($timefilter|tonumber) and .address==$address and .category=="send")] | length')
             totalntrzd=$(( $totalntrzd + $acntrzd ))
-            printf "$format" "${coin[0]}" \
+            
+            if [[ ${coin[0]} == "SUPERNET" ]]; then
+                nameoutput="${coin[0]}$(checkRepo ${iguanarepo[0]} ${iguanarepo[1]})"
+            else
+                nameoutput="${coin[0]}"
+            fi
+            
+            printf "$format" "$nameoutput" \
                     "$acntrzd" \
                     "$(komodo-cli -ac_name=${coin[0]} listunspent | jq --arg amt "$utxoamt" '[.[] | select(.amount==($amt|tonumber))] | length')" \
                     "$(echo $info | jq .blocks)" \
-                    "$(echo $info | jq .balance)" \
+                    "$(printf "%12.8f" $(echo $info | jq .balance))" \
                     "$(timeSince $lastntrztime)" \
                     "$(echo $info | jq .connections)"
         fi
     done
-    printf "Total: %9s %44s" "$totalntrzd" "$now";
-
-    for repo in "${repos[@]}"; do
-        checkRepo ${repo[0]} ${repo[1]} ${repo[2]} 
-    done
+    printf "Total: %12s %44s" "$totalntrzd" "$now";
 }
 
 if [ "$sleepytime" != "false" ]
