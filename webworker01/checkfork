@@ -1,39 +1,70 @@
 #!/bin/bash
 
+#You can modify this list of ACs to exclude or comment out the line to show all
+ignoreacs=('VOTE2018' 'BEER' 'PIZZA')
+
 source coinlist
 forked=false
 
+remotecheck=$(curl -Ssf https://komodostats.com/api/notary/summary.json)
+
 blocks=$(komodo-cli getinfo | jq .blocks)
 longest=$(komodo-cli getinfo | jq .longestchain)
+remoteblocks=$(echo $remotecheck | jq '.[] | select(.ac_name=="KMD") | .blocks')
 
 if ((blocks < longest)); then
     forked=true
     printf "\033[0;31mKMD - Possible fork!\033[0m Blocks $blocks < LongestChain $longest\n"
+elif ((blocks != remoteblocks)); then
+    forked=true
+    printf "\033[0;31mKMD - Possible fork!\033[0m Blocks $blocks != Remote $remoteblocks\n"
 else
-    echo "KMD - Blocks $blocks = LongestChain $longest"
+    echo "KMD - Blocks $blocks, LongestChain $longest, Remote $remoteblocks"
 fi
 
 blocks=$(chips-cli getinfo | jq .blocks)
 longest=$(chips-cli getinfo | jq .headers)
+remoteblocks=$(echo $remotecheck | jq '.[] | select(.ac_name=="CHIPS") | .blocks')
 
 if ((blocks < longest)); then
     forked=true
     printf "\033[0;31mCHIPS - Possible fork!\033[0m Blocks $blocks < Headers $longest\n"
+elif ((blocks != remoteblocks)); then
+    forked=true
+    printf "\033[0;31mCHIPS - Possible fork!\033[0m Blocks $blocks != Remote $remoteblocks\n"
 else
-    echo "CHIPS - Blocks $blocks = Headers $longest"
+    echo "CHIPS - Blocks $blocks, LongestChain $longest, Remote $remoteblocks"
+fi
+
+blocks=$(gamecredits-cli getinfo | jq .blocks)
+remoteblocks=$(echo $remotecheck | jq '.[] | select(.ac_name=="GAME") | .blocks')
+
+if ((blocks != remoteblocks)); then
+    forked=true
+    printf "\033[0;31mGAME - Possible fork!\033[0m Blocks $blocks != Remote $remoteblocks\n"
+else
+    echo "GAME - Blocks $blocks, Remote $remoteblocks"
 fi
 
 for coins in "${coinlist[@]}"; do
     coin=($coins)
-
-    blocks=$(komodo-cli -ac_name=${coin[0]} getinfo | jq .blocks)
-    longest=$(komodo-cli -ac_name=${coin[0]} getinfo | jq .longestchain)
     
-    if ((blocks < longest)); then
-        forked=true
-        printf "\033[0;31m${coin[0]} - Possible fork!\033[0m Blocks $blocks < LongestChain $longest\n"
-    else
-        echo "${coin[0]} - Blocks $blocks = LongestChain $longest"
+    if [[ ! ${ignoreacs[*]} =~ ${coin[0]} ]]; then
+
+        blocks=$(komodo-cli -ac_name=${coin[0]} getinfo | jq .blocks)
+        longest=$(komodo-cli -ac_name=${coin[0]} getinfo | jq .longestchain)
+        remoteblocks=$(echo $remotecheck | jq --arg acname ${coin[0]} '.[] | select(.ac_name==$acname) | .blocks')
+        
+        if ((blocks < longest)); then
+            forked=true
+            printf "\033[0;31m${coin[0]} - Possible fork!\033[0m Blocks $blocks < LongestChain $longest\n"
+        elif ((blocks != remoteblocks)); then
+            forked=true
+            printf "\033[0;31m${coin[0]} - Possible fork!\033[0m Blocks $blocks != Remote $remoteblocks\n"
+        else
+            echo "${coin[0]} - Blocks $blocks, LongestChain $longest, Remote $remoteblocks"
+        fi
+    
     fi
 done
 
