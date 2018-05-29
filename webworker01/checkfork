@@ -26,17 +26,14 @@ diff2=$((blocks-remoteblocks2))
 thisformat=$format
 if ((blocks < longest)); then
     forked=true
-    #longest="${colorred}$longest${colorreset}"
     thisformat=$redformat
 fi
 if (( diff1 < variance * -1 )) || (( diff1 > variance )); then
     forked=true
-    #remoteblocks="${colorred}$remoteblocks${colorreset}"
     thisformat=$redformat
 fi
 if (( diff2 < variance * -1 )) || (( diff2 > variance )); then
     forked=true
-    #remoteblocks2="${colorred}$remoteblocks2${colorreset}"
     thisformat=$redformat
 fi
 printf "$thisformat" "KMD" "$blocks" "$longest" "$remoteblocks" "$remoteblocks2"
@@ -49,12 +46,10 @@ diff1=$((blocks-remoteblocks))
 thisformat=$format
 if ((blocks < longest)); then
     forked=true
-    #longest="${colorred}$longest${colorreset}"
     thisformat=$redformat
 fi
 if (( diff1 < variance * -1 )) || (( diff1 > variance )); then
     forked=true
-    #remoteblocks="${colorred}$remoteblocks${colorreset}"
     thisformat=$redformat
 fi
 printf "$thisformat" "CHIPS" "$blocks" "$longest" "$remoteblocks"
@@ -66,7 +61,6 @@ diff1=$((blocks-remoteblocks))
 thisformat=$format
 if (( diff1 < variance * -1 )) || (( diff1 > variance )); then
     forked=true
-    #remoteblocks="${colorred}$remoteblocks${colorreset}"
     thisformat=$redformat
 fi
 printf "$thisformat" "GAME" "$blocks" " " "$remoteblocks"
@@ -85,17 +79,14 @@ for coins in "${coinlist[@]}"; do
         thisformat=$format
         if ((blocks < longest)); then
             forked=true
-            #longest="${colorred}$longest${colorreset}"
             thisformat=$redformat
         fi
         if (( diff1 < variance * -1 )) || (( diff1 > variance )); then
             forked=true
-            #remoteblocks="${colorred}$remoteblocks${colorreset}"
             thisformat=$redformat
         fi
         if (( diff2 < variance * -1 )) || (( diff2 > variance )); then
             forked=true
-            #remoteblocks2="${colorred}$remoteblocks2${colorreset}"
             thisformat=$redformat
         fi
         printf "$thisformat" "${coin[0]}" "$blocks" "$longest" "$remoteblocks" "$remoteblocks2"
