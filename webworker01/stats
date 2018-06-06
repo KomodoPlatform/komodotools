@@ -54,23 +54,38 @@ timeSince () {
 }
 
 checkRepo () {
-    if [ -z $1 ] || [ -z $2 ]; then
+    if [ -z $1 ] || [ -z $2 ] || [ -z $3 ]; then
         return
     fi
 
     prevdir=${PWD}
 
-    eval cd "$1"
+    eval cd "$2"
+
+    color_red=$'\033[0;31m'
+    color_reset=$'\033[0m'
 
     git remote update > /dev/null 2>&1
 
     localrev=$(git rev-parse HEAD)
-    remoterev=$(git rev-parse $2)
+    remoterev=$(git rev-parse $3)
     cd $prevdir
 
     if [ $localrev != $remoterev ]; then
-        printf "\033[0;31m[U]\033[0m"
+        printf "$color_red[U]$color_reset"
     fi
+    
+    case $1 in
+        KMD)
+            printf "     "
+            ;;
+        CHIPS)
+            printf "   "
+            ;;
+        GAME)
+            printf "    "
+            ;;
+    esac
 }
 
 #Do not change below for any reason!
@@ -117,7 +132,7 @@ outputstats ()
     kmdtxinfo=$(komodo-cli listtransactions "" $txscanamount)
     kmdlastntrztime=$(echo $kmdtxinfo | jq -r --arg address "$kmdntrzaddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
     repo=(${repos[KMD]})
-    printf "$format\n" "KMD$(checkRepo ${repo[0]} ${repo[1]})" \
+    printf "$format\n" "KMD$(checkRepo KMD ${repo[0]} ${repo[1]})" \
             " " \
             "$(komodo-cli listunspent | jq --arg amt "$utxoamt" '[.[] | select(.amount==($amt|tonumber))] | length')" \
             "$(echo $kmdinfo | jq .blocks)" \
@@ -143,7 +158,7 @@ outputstats ()
         coinsntrzd=$(echo $coinstxinfo | jq --arg address "$coinsntraddr" --arg timefilter $timefilter2 '[.[] | select(.time>=($timefilter|tonumber) and .address==$address and .category=="send")] | length')
         totalntrzd=$(( $totalntrzd + $coinsntrzd ))
         repo=(${repos[${coin[0]}]})
-        printf "$format\n" "${coin[0]}$(checkRepo ${repo[0]} ${repo[1]})" \
+        printf "$format\n" "${coin[0]}$(checkRepo ${coin[0]} ${repo[0]} ${repo[1]})" \
                 "$coinsntrzd" \
                 "$(${coin[1]} listunspent | jq --arg amt "$coinsutxoamount" '[.[] | select(.amount==($amt|tonumber))] | length')" \
                 "$(echo $coinsinfo | jq .blocks)" \
@@ -153,6 +168,7 @@ outputstats ()
     done
 
     lastcoin=(${coinlist[-1]})
+    secondlast=(${coinlist[-2]})
     for coins in "${coinlist[@]}"; do
         coin=($coins)
 
@@ -167,10 +183,13 @@ outputstats ()
             laststring=""
 
             if [[ ${coin[0]} == ${lastcoin[0]} ]]; then
-                laststring="All:$totalntrzd @$now"
+                laststring="@ $now"
+            fi
+            if [[ ${coin[0]} == ${secondlast[0]} ]]; then
+                laststring="All:$totalntrzd"
             fi
 
-            printf "$format" "${coin[0]}$(checkRepo ${repo[0]} ${repo[1]})" \
+            printf "$format" "${coin[0]}$(checkRepo ${coin[0]} ${repo[0]} ${repo[1]})" \
                     "$acntrzd" \
                     "$(komodo-cli -ac_name=${coin[0]} listunspent | jq --arg amt "$utxoamt" '[.[] | select(.amount==($amt|tonumber))] | length')" \
                     "$(echo $info | jq .blocks)" \
