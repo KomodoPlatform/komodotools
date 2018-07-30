@@ -1,2 +1,0 @@
-#!/bin/bash
-komodo-cli listtransactions "" 90000 0 false | grep txid | wc -l

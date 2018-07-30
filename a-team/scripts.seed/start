@@ -8,3 +8,5 @@ chipsd -pubkey=$pubkey &
 sleep 90
 echo "Starting GameCredits"
 gamecreditsd -pubkey=$pubkey &
+#Starting Hush
+#hushd -pubkey=$pubkey

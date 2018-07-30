@@ -1,5 +1,4 @@
 #!/bin/bash
-set -eo pipefail
 ~/komodo/src/listassetchains | while read chain; do
   difficulty=$(komodo-cli -ac_name=$chain getmininginfo | jq -r .difficulty)
   diff=$(printf '%.*f\n' 0 $difficulty)

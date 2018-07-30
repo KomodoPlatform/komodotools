@@ -1,1 +1,0 @@
-komodo-cli sendtoaddress RSuXRScqHNbRFqjur2C3tf3oDoauBs2B1i $(awk "BEGIN { print $(komodo-cli getbalance) - 0.0325 }") "" "" true
