@@ -1,0 +1,14 @@
+komodo-cli -ac_name=PIZZA addnode  77.95.229.63 add
+komodo-cli -ac_name=PIZZA addnode  109.105.61.27 add
+komodo-cli -ac_name=PIZZA addnode  139.60.161.30 add
+komodo-cli -ac_name=PIZZA addnode  82.220.39.84 add
+komodo-cli -ac_name=PIZZA addnode  163.172.30.96 add
+komodo-cli -ac_name=PIZZA addnode  209.58.169.118 add
+komodo-cli -ac_name=PIZZA addnode  188.165.48.169 add
+komodo-cli -ac_name=PIZZA addnode  74.208.210.191 add
+komodo-cli -ac_name=PIZZA addnode  145.239.204.33 add
+komodo-cli -ac_name=PIZZA addnode  31.192.110.70 add
+komodo-cli -ac_name=PIZZA addnode  139.99.124.117 add
+komodo-cli -ac_name=PIZZA addnode  167.114.208.203 add
+komodo-cli -ac_name=PIZZA addnode  195.154.78.44 add
+komodo-cli -ac_name=PIZZA addnode  139.99.148.62 add

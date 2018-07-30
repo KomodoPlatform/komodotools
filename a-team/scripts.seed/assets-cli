@@ -1,0 +1,9 @@
+#!/bin/bash
+#set -eo pipefail
+
+args="$@"
+
+~/komodo/src/listassetchains | while read chain; do
+  echo $chain
+  komodo-cli -ac_name=$chain $args
+done

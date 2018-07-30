@@ -1,0 +1,10 @@
+#!/bin/bash
+source ~/komodo/src/pubkey.txt
+echo "Starting Komodo"
+komodod -gen -pubkey=$pubkey &
+sleep 90
+echo "Starting Chips"
+chipsd -pubkey=$pubkey &
+sleep 90
+echo "Starting GameCredits"
+gamecreditsd -pubkey=$pubkey &

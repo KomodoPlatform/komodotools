@@ -1,0 +1,17 @@
+#!/bin/bash
+set -eo pipefail
+# I mine AC to another pubkey
+pubkey=032db8d58edd3b6e0ec9faab28adde91d01b388472390d2500f5983f536def29d1
+overide_args="${@}"
+delay=5
+seed_ip=`getent hosts zero.kolo.supernet.org | awk '{ print $1 }'`
+
+# start verus here as its using a diffrent komodod
+verusd -pubkey=$pubkey -addnode=$seed_ip $args &
+sleep $delay
+
+# List all AC from main repo and start them
+~/komodo/src/listassetchainparams | while read args; do
+  komodod $args $overide_args -pubkey=$pubkey -addnode=$seed_ip &
+  sleep $delay
+done

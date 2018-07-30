@@ -1,0 +1,13 @@
+#!/bin/bash
+set -eo pipefail
+~/komodo/src/listassetchains | while read chain; do
+  difficulty=$(komodo-cli -ac_name=$chain getmininginfo | jq -r .difficulty)
+  diff=$(printf '%.*f\n' 0 $difficulty)
+  if (( $diff > 200 )); then
+   echo "Not Mining: $chain"
+   komodo-cli -ac_name=$chain setgenerate false
+  else
+   echo "Mining: $chain"
+   komodo-cli -ac_name=$chain setgenerate true 2
+  fi
+done

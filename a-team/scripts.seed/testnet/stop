@@ -1,0 +1,3 @@
+pkill -15 iguana
+./testnet-cli stop
+komodo-cli stop
