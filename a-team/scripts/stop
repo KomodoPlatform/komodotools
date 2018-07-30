@@ -1,9 +1,0 @@
-echo "Stopping Iguana"
-pkill -15 iguana
-assets-cli stop
-echo "Stopping Komodo"
-komodo-cli stop
-echo "Stopping Chips"
-chips-cli stop
-echo "Stopping Bitcoin"
-bitcoin-cli stop

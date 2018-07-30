@@ -1,2 +1,0 @@
-source ~/SuperNET/iguana/passphrase.txt
-curl --url "http://127.0.0.1:7776" --data "{\"method\":\"walletpassphrase\",\"params\":[\"$passphrase\", 9999999]}"
