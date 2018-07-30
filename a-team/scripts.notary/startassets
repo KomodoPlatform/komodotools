@@ -1,0 +1,32 @@
+#!/bin/bash
+set -eo pipefail
+source ~/komodo/src/pubkey.txt
+delay=15
+overide_args="${@}"
+extra_args="-connect=172.16.16.11"
+source skip
+
+#wait for deamon to start
+delay () {
+  started=0
+  while [[ $started -eq 0 ]]; do
+    sleep 15
+    $komodopath getbalance
+    outcome=$(echo $?)
+    if [[ $outcome -eq 0 ]]; then
+      started=1
+    fi
+  done
+}
+
+verusd $overide_args $extra_args -pubkey=$pubkey &
+sleep $delay
+
+~/komodo/src/listassetchainparams | while read args; do
+  if [[ " ${skip[@]} " =~ " ${args} " ]]; then
+    pointless=0
+  else
+    komodod $args $overide_args $extra_args -pubkey=$pubkey &
+    sleep $delay
+  fi
+done

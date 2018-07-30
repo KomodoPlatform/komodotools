@@ -1,0 +1,20 @@
+#!/bin/bash
+print_txid () {
+  echo -n "$1" | jq .txid
+}
+
+echo "Checking BTC"
+cd ~
+now=$(date +"%Y-%m-%d %T%z")
+echo "$now"
+echo -n BTC
+UTXOS="$(bitcoin-cli listunspent | grep -c .00010000)"
+echo -n -e '\t\t';echo -n "$UTXOS"
+
+if [ "$UTXOS" -lt "99" ]
+   then
+     echo -n " - SPLITFUNDING BTC: "
+     RESULT="$(acsplit BTC 20)"
+     print_txid "$RESULT"
+fi
+echo "---------------------------------------------------------------------------------------------"

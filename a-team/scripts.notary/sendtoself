@@ -1,0 +1,2 @@
+#!/bin/bash
+komodo-cli sendtoaddress $1 $(komodo-cli getbalance) "" "" true

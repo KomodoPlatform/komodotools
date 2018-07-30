@@ -1,0 +1,7 @@
+#!/bin/bash
+touch ~/.komodo/komodo.conf
+bitcoind &
+sleep 10
+chipsd &
+sleep 10
+komodod &
