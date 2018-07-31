@@ -1,42 +1,32 @@
 #!/bin/bash
 # Remove BEER and PIZZA from splitfund as they are not notarized.
 declare -a skip=("BEER" "PIZZA")
+# Minimum number of UTXOs to maintain
+TARGETAMNT=10
 
 print_txid () {
   echo -n $(echo $1 | jq -r .txid)
 }
 
-# Minimum number of UTXOs to maintain
-MINUTXOS=10
-
 # Amount of UTXOs to create at one time
-SPLITAMNT=10
+splitamount () {
+  SPLITAMNT=$(( $TARGETAMNT -$1 ))
+}
 
 #Print Date and Time
 now=$(date +"%Y-%m-%d %T%z")
 echo $now
 
-# Manual Check of CHIPS, KMD
-echo "Checking GAME, CHIPS, KMD, VRSC"
+echo "Checking CHIPS, KMD, GAME, VRSC"
 cd ~
 echo -n CHIPS
 UTXOS="$(chips-cli listunspent | grep -c .00010000)"
 echo -n -e '\t\t';echo -n "$UTXOS"
-if [ "$UTXOS" -lt "$MINUTXOS" ]
+if [ "$UTXOS" -lt "25" ]
    then
+     SPLITAMNT=$(( 25 -$UTXOS ))
      echo -n " - SPLITFUNDING CHIPS: "
      RESULT="$(acsplit CHIPS $SPLITAMNT)"
-     print_txid $RESULT
-   fi
-echo ""
-
-echo -n GAME
-UTXOS="$(gc-cli listunspent | grep -c .00100000)"
-echo -n -e '\t\t';echo -n "$UTXOS"
-if [ "$UTXOS" -lt "15" ]
-   then
-     echo -n " - SPLITFUNDING GAME: "
-     RESULT=$(curl --silent --url "http://127.0.0.1:7776" --data "{\"coin\":\"GAME\",\"agent\":\"iguana\",\"method\":\"splitfunds\",\"satoshis\":\"100000\",\"sendflag\":1,\"duplicates\":"15"}")
      print_txid $RESULT
    fi
 echo ""
@@ -44,10 +34,23 @@ echo ""
 echo -n KMD
 UTXOS="$(komodo-cli listunspent | grep -c .00010000)"
 echo -n -e '\t\t';echo -n "$UTXOS"
-if [ "$UTXOS" -lt "77" ]
+if [ "$UTXOS" -lt "50" ]
    then
+     SPLITAMNT=$(( 50 -$UTXOS ))
      echo -n " - SPLITFUNDING KMD: "
      RESULT="$(acsplit KMD 77)"
+     print_txid $RESULT
+   fi
+echo ""
+
+echo -n GAME
+UTXOS="$(gc-cli listunspent | grep -c .00100000)"
+echo -n -e '\t\t';echo -n "$UTXOS"
+if [ "$UTXOS" -lt "$TARGETAMNT" ]
+   then
+     splitamount $UTXOS
+     echo -n " - SPLITFUNDING GAME: "
+     RESULT=$(curl --silent --url "http://127.0.0.1:7776" --data "{\"coin\":\"GAME\",\"agent\":\"iguana\",\"method\":\"splitfunds\",\"satoshis\":\"100000\",\"sendflag\":1,\"duplicates\":"$SPLITAMNT"}")
      print_txid $RESULT
    fi
 echo ""
@@ -55,8 +58,9 @@ echo ""
 echo -n VRSC
 UTXOS="$(komodo-cli -ac_name=VRSC listunspent | grep -c .00010000)"
 echo -n -e '\t\t';echo -n "$UTXOS"
-if [ "$UTXOS" -lt "$MINUTXOS" ]
+if [ "$UTXOS" -lt "$TARGETAMNT" ]
    then
+     splitamount $UTXOS
      echo -n " - SPLITFUNDING VRSC: "
      RESULT="$(acsplit VRSC $SPLITAMNT)"
      print_txid $RESULT
@@ -72,7 +76,8 @@ echo "Checking Other Coins"
      echo -n $chain
      UTXOS="$(komodo-cli -ac_name=$chain listunspent | grep -c .00010000)"
      echo -n -e '\t\t';echo -n "$UTXOS"
-     if [ "$UTXOS" -lt "$MINUTXOS" ]; then
+     if [ "$UTXOS" -lt "$TARGETAMNT" ]; then
+       splitamount $UTXOS
        echo -n " - SPLITFUNDING $chain: "
        RESULT="$(acsplit $chain $SPLITAMNT)"
        print_txid $RESULT
