@@ -1,5 +1,5 @@
 #!/bin/bash
-source pubkey.txt
+source ~/komodo/src/pubkey.txt
 delay=7
 declare -a skip=("BEER" "PIZZA" "RFOX")
 
