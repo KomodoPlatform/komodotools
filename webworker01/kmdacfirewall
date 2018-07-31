@@ -38,6 +38,7 @@ sudo ufw allow 14357 comment 'BNTN'
 sudo ufw allow 15586 comment 'CHAIN'
 sudo ufw allow 9678  comment 'PRLPAY'
 sudo ufw allow 40002 comment 'GAME'
+sudo ufw allow 11556 comment 'DSEC'
 sudo ufw allow 15722 comment 'GLXT'
 sudo ufw allow 10305 comment 'EQL'
 sudo ufw enable
