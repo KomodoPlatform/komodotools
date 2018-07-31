@@ -38,7 +38,7 @@ if [ "$UTXOS" -lt "50" ]
    then
      SPLITAMNT=$(( 50 -$UTXOS ))
      echo -n " - SPLITFUNDING KMD: "
-     RESULT="$(acsplit KMD 77)"
+     RESULT="$(acsplit KMD $SPLITAMNT)"
      print_txid $RESULT
    fi
 echo ""
@@ -46,11 +46,10 @@ echo ""
 echo -n GAME
 UTXOS="$(gc-cli listunspent | grep -c .00100000)"
 echo -n -e '\t\t';echo -n "$UTXOS"
-if [ "$UTXOS" -lt "$TARGETAMNT" ]
+if [ "$UTXOS" -lt "10" ]
    then
-     splitamount $UTXOS
      echo -n " - SPLITFUNDING GAME: "
-     RESULT=$(curl --silent --url "http://127.0.0.1:7776" --data "{\"coin\":\"GAME\",\"agent\":\"iguana\",\"method\":\"splitfunds\",\"satoshis\":\"100000\",\"sendflag\":1,\"duplicates\":"$SPLITAMNT"}")
+     RESULT=$(curl --silent --url "http://127.0.0.1:7776" --data "{\"coin\":\"GAME\",\"agent\":\"iguana\",\"method\":\"splitfunds\",\"satoshis\":\"100000\",\"sendflag\":1,\"duplicates\":"20"}")
      print_txid $RESULT
    fi
 echo ""

@@ -19,5 +19,5 @@ sudo ln -sf /home/$USER/GameCredits/src/gamecreditsd /usr/local/bin/gamecreditsd
 #Link scripts
 sudo ln -sf /home/$USER/scripts/acsplit /usr/local/bin/acsplit
 sudo ln -sf /home/$USER/scripts/assets-cli /usr/local/bin/assets-cli
-
+sudo ln -sf /home/$USER/scripts/asset-cli /usr/local/bin/asset-cli
 
