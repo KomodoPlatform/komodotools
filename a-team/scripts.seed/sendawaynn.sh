@@ -1,8 +1,9 @@
 #!/bin/bash
 cd ~/scripts/
 curdir=$(pwd)
-curluser=userfb6d081f05e889ac
-curlpass=9db93973b9a4e0a222e6d961d8086987
+thisconf=$(<~/.komodo/komodo.conf)
+curluser=$(echo $thisconf | grep -Po "rpcuser=(\S*)" | sed 's/rpcuser=//')
+curlpass=$(echo $thisconf | grep -Po "rpcpassword=(\S*)" | sed 's/rpcpassword=//')
 curlport=7771
 
 curl -s --user $curluser:$curlpass --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "listunspent", "params": [0, 9999999]}' -H 'content-type: text/plain;' http://127.0.0.1:$curlport/ | jq .result > $curdir/createrawtx.txt
@@ -19,8 +20,8 @@ printf "$now \n";
 # Print balance.
 echo 'Balance: '$balance
 
-# Balance less than 10 abort, we want maximum rewards.
-if (( $(echo "$balance < 10" | bc -l) )); then
+# Balance less than 11 abort, we want maximum rewards.
+if (( $(echo "$balance < 11" | bc -l) )); then
   echo "----------------------------------------------------------------"
   echo " "
   exit
@@ -38,6 +39,6 @@ signed=$(curl -s --user $curluser:$curlpass --data-binary '{"jsonrpc": "1.0", "i
 
 #Broadcast the transaction
 txid=$(curl -s --user $curluser:$curlpass --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "sendrawtransaction", "params": ["'$signed'"]}' -H 'content-type: text/plain;' http://127.0.0.1:$curlport/ | jq -r .result)
-echo $txid
+#echo $txid
 echo "----------------------------------------------------------------"
 echo " "
