@@ -39,6 +39,6 @@ signed=$(curl -s --user $curluser:$curlpass --data-binary '{"jsonrpc": "1.0", "i
 
 #Broadcast the transaction
 txid=$(curl -s --user $curluser:$curlpass --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "sendrawtransaction", "params": ["'$signed'"]}' -H 'content-type: text/plain;' http://127.0.0.1:$curlport/ | jq -r .result)
-#echo $txid
+echo $txid
 echo "----------------------------------------------------------------"
 echo " "
