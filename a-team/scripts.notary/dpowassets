@@ -1,0 +1,21 @@
+#!/bin/bash
+source pubkey.txt
+delay=7
+declare -a skip=("BEER" "PIZZA" "RFOX")
+
+~/komodo/src/listassetchains | while read chain; do
+  if [[ " ${skip[@]} " =~ " ${chain} " ]]; then
+    pointless=0
+  else
+    curl --url "http://127.0.0.1:7776" --data "{\"agent\":\"iguana\",\"method\":\"dpow\",\"symbol\":\"$chain\",\"pubkey\":\"$pubkey\"}"
+    sleep $delay
+  fi
+done
+
+curl --url "http://127.0.0.1:7776" --data "{\"agent\":\"iguana\",\"method\":\"dpow\",\"symbol\":\"CHIPS\",\"pubkey\":\"$pubkey\"}"
+sleep $delay
+curl --url "http://127.0.0.1:7776" --data "{\"agent\":\"iguana\",\"method\":\"dpow\",\"symbol\":\"GAME\",\"freq\":5,\"pubkey\":\"$pubkey\"}"
+sleep $delay
+curl --url "http://127.0.0.1:7776" --data "{\"agent\":\"iguana\",\"method\":\"dpow\",\"symbol\":\"RFOX\",\"freq\":10,\"pubkey\":\"$pubkey\"}"
+sleep $delay
+curl --url "http://127.0.0.1:7776" --data "{\"agent\":\"iguana\",\"method\":\"dpow\",\"symbol\":\"VRSC\",\"freq\":10,\"pubkey\":\"$pubkey\"}"
