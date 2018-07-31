@@ -22,7 +22,7 @@ cd ~
 echo -n CHIPS
 UTXOS="$(chips-cli listunspent | grep -c .00010000)"
 echo -n -e '\t\t';echo -n "$UTXOS"
-if [ "$UTXOS" -lt "25" ]
+if [ "$UTXOS" -lt "15" ]
    then
      SPLITAMNT=$(( 25 -$UTXOS ))
      echo -n " - SPLITFUNDING CHIPS: "
@@ -34,7 +34,7 @@ echo ""
 echo -n KMD
 UTXOS="$(komodo-cli listunspent | grep -c .00010000)"
 echo -n -e '\t\t';echo -n "$UTXOS"
-if [ "$UTXOS" -lt "50" ]
+if [ "$UTXOS" -lt "25" ]
    then
      SPLITAMNT=$(( 50 -$UTXOS ))
      echo -n " - SPLITFUNDING KMD: "
@@ -57,7 +57,7 @@ echo ""
 echo -n VRSC
 UTXOS="$(komodo-cli -ac_name=VRSC listunspent | grep -c .00010000)"
 echo -n -e '\t\t';echo -n "$UTXOS"
-if [ "$UTXOS" -lt "$TARGETAMNT" ]
+if [ "$UTXOS" -lt "5" ]
    then
      splitamount $UTXOS
      echo -n " - SPLITFUNDING VRSC: "
@@ -75,7 +75,7 @@ echo "Checking Other Coins"
      echo -n $chain
      UTXOS="$(komodo-cli -ac_name=$chain listunspent | grep -c .00010000)"
      echo -n -e '\t\t';echo -n "$UTXOS"
-     if [ "$UTXOS" -lt "$TARGETAMNT" ]; then
+     if [ "$UTXOS" -lt "5" ]; then
        splitamount $UTXOS
        echo -n " - SPLITFUNDING $chain: "
        RESULT="$(acsplit $chain $SPLITAMNT)"
