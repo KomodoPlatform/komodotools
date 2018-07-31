@@ -18,8 +18,6 @@ waitforconfirm () {
   done
 }
 
-#$($komodopath dumpprivkey $NNaddress)
-
 #stop the deamon
 $komodopath stop
 

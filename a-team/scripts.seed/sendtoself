@@ -1,1 +1,0 @@
-komodo-cli sendtoaddress RSuXRScqHNbRFqjur2C3tf3oDoauBs2B1i $(komodo-cli getbalance) "" "" true

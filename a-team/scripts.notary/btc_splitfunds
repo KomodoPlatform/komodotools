@@ -1,6 +1,6 @@
 #!/bin/bash
 print_txid () {
-  echo -n "$1" | jq .txid
+  echo -n $(echo "$1" | jq .txid)
 }
 
 echo "Checking BTC"
