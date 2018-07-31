@@ -26,7 +26,7 @@ if [ "$UTXOS" -lt "25" ]
    then
      SPLITAMNT=$(( 25 -$UTXOS ))
      echo -n " - SPLITFUNDING CHIPS: "
-     echo $SPLITAMNT #RESULT="$(acsplit CHIPS $SPLITAMNT)"
+     RESULT="$(acsplit CHIPS $SPLITAMNT)"
      print_txid $RESULT
    fi
 echo ""
@@ -38,7 +38,7 @@ if [ "$UTXOS" -lt "50" ]
    then
      SPLITAMNT=$(( 50 -$UTXOS ))
      echo -n " - SPLITFUNDING KMD: "
-     echo $SPLITAMNT #RESULT="$(acsplit KMD 77)"
+     RESULT="$(acsplit KMD 77)"
      print_txid $RESULT
    fi
 echo ""
@@ -50,7 +50,7 @@ if [ "$UTXOS" -lt "$TARGETAMNT" ]
    then
      splitamount $UTXOS
      echo -n " - SPLITFUNDING GAME: "
-     echo $SPLITAMNT #RESULT=$(curl --silent --url "http://127.0.0.1:7776" --data "{\"coin\":\"GAME\",\"agent\":\"iguana\",\"method\":\"splitfunds\",\"satoshis\":\"100000\",\"sendflag\":1,\"duplicates\":"$SPLITAMNT"}")
+     RESULT=$(curl --silent --url "http://127.0.0.1:7776" --data "{\"coin\":\"GAME\",\"agent\":\"iguana\",\"method\":\"splitfunds\",\"satoshis\":\"100000\",\"sendflag\":1,\"duplicates\":"$SPLITAMNT"}")
      print_txid $RESULT
    fi
 echo ""
@@ -62,7 +62,7 @@ if [ "$UTXOS" -lt "$TARGETAMNT" ]
    then
      splitamount $UTXOS
      echo -n " - SPLITFUNDING VRSC: "
-     echo $SPLITAMNT #RESULT="$(acsplit VRSC $SPLITAMNT)"
+     RESULT="$(acsplit VRSC $SPLITAMNT)"
      print_txid $RESULT
    fi
 echo ""
@@ -79,7 +79,7 @@ echo "Checking Other Coins"
      if [ "$UTXOS" -lt "$TARGETAMNT" ]; then
        splitamount $UTXOS
        echo -n " - SPLITFUNDING $chain: "
-       echo $SPLITAMNT #RESULT="$(acsplit $chain $SPLITAMNT)"
+       RESULT="$(acsplit $chain $SPLITAMNT)"
        print_txid $RESULT
      fi
      echo ""
