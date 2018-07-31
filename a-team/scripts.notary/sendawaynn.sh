@@ -1,9 +1,10 @@
 #!/bin/bash
+cd ~/scripts/
 curdir=$(pwd)
-thisconf="~/.komodo/komodo.conf"
+thisconf=$(<~/.komodo/komodo.conf)
 curluser=$(echo $thisconf | grep -Po "rpcuser=(\S*)" | sed 's/rpcuser=//')
 curlpass=$(echo $thisconf | grep -Po "rpcpassword=(\S*)" | sed 's/rpcpassword=//')
-curlport=$(echo $thisconf | grep -Po "rpcport=(\S*)" | sed 's/rpcport=//')
+curlport=7771
 
 curl -s --user $curluser:$curlpass --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "listunspent", "params": [0, 9999999]}' -H 'content-type: text/plain;' http://127.0.0.1:$curlport/ | jq .result > $curdir/createrawtx.txt
 # we will send all spendable and generated coins
@@ -19,8 +20,8 @@ printf "$now \n";
 # Print balance.
 echo 'Balance: '$balance
 
-# Balance less than 10 abort, we want maximum rewards.
-if (( $(echo "$balance < 10" | bc -l) )); then
+# Balance less than 11 abort, we want maximum rewards.
+if (( $(echo "$balance < 11" | bc -l) )); then
   echo "----------------------------------------------------------------"
   echo " "
   exit
@@ -37,7 +38,7 @@ hex=${hex::-8}$nlocktime
 signed=$(curl -s --user $curluser:$curlpass --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "signrawtransaction", "params": ["'$hex'"]}' -H 'content-type: text/plain;' http://127.0.0.1:$curlport/  | jq -r .result.hex)
 
 #Broadcast the transaction
-#txid=$(curl -s --user $curluser:$curlpass --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "sendrawtransaction", "params": ["'$signed'"]}' -H 'content-type: text/plain;' http://127.0.0.1:$curlport/ | jq -r .result)
+txid=$(curl -s --user $curluser:$curlpass --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "sendrawtransaction", "params": ["'$signed'"]}' -H 'content-type: text/plain;' http://127.0.0.1:$curlport/ | jq -r .result)
 #echo $txid
 echo "----------------------------------------------------------------"
 echo " "
