@@ -6,7 +6,7 @@ TARGETAMNT=10
 
 print_txid () {
   txid=$(echo $1 | jq -r .txid)
-  if [[ $txid = "null" ]]; then
+  if [[ $txid = "" ]]; then
     echo -n "No valid UTXO to split"
   else
     echo -n $txid
