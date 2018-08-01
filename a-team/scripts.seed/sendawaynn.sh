@@ -12,14 +12,6 @@ transactions=$(cat $curdir/createrawtx.txt | jq '.[] | select (.spendable == tru
 balance=$(cat $curdir/createrawtx.txt      | jq '.[] | select (.spendable == true and .generated == true) | .amount' | jq -s add)
 balance=$(echo "scale=8; $balance/1*1" | bc -l | sed 's/^\./0./')
 
-# Print Date and Time
-echo "----------------------------------------------------------------"
-now=$(date +"%Y-%m-%d %T%z")
-printf "$now \n";
-
-# Print balance.
-echo 'Balance: '$balance
-
 # Balance less than 11 abort, we want maximum rewards.
 if (( $(echo "$balance < 11" | bc -l) )); then
   echo "----------------------------------------------------------------"
@@ -40,5 +32,11 @@ signed=$(curl -s --user $curluser:$curlpass --data-binary '{"jsonrpc": "1.0", "i
 #Broadcast the transaction
 txid=$(curl -s --user $curluser:$curlpass --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "sendrawtransaction", "params": ["'$signed'"]}' -H 'content-type: text/plain;' http://127.0.0.1:$curlport/ | jq -r .result)
 #echo $txid
+# Print Date and Time
+echo "----------------------------------------------------------------"
+now=$(date +"%Y-%m-%d %T%z")
+printf "$now \n";
+# Print balance.
+echo 'Balance: '$balance
 echo "----------------------------------------------------------------"
 echo " "

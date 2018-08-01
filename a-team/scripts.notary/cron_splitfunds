@@ -5,7 +5,12 @@ declare -a skip=("BEER" "PIZZA")
 TARGETAMNT=10
 
 print_txid () {
-  echo -n $(echo $1 | jq -r .txid)
+  txid=$(echo $1 | jq -r .txid)
+  if [[ $txid = "null" ]]; then
+    echo -n "No valid UTXO to split"
+  else
+    echo -n $txid
+  fi
 }
 
 # Amount of UTXOs to create at one time
