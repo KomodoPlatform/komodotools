@@ -7,4 +7,4 @@ echo "Starting Chips"
 chipsd &
 sleep 10
 echo "Starting Komodo"
-komodod -gen -genproclimit=2 -notary -pubkey=$pubkey &
+komodod -gen -genproclimit=7 -notary -pubkey=$pubkey &

@@ -1,0 +1,18 @@
+#!/bin/bash
+declare -a skip=("BEER" "PIZZA")
+delay=0.5
+NNaddress=RSuXRScqHNbRFqjur2C3tf3oDoauBs2B1i
+NNprivkey=$(ssh node@172.16.16.11 "bash -s" -- < ./dumpKMDprivkey $NNaddress)
+komodo-cli importprivkey $NNprivkey "" false
+ssh node@172.16.16.11 "bash -s" -- < ./sendtoself $NNaddress
+
+~/komodo/src/listassetchains | while read chain; do
+  if [[ " ${skip[@]} " =~ " ${chain} " ]]; then
+    pointless=0
+  else
+    echo $chain
+    komodo-cli -ac_name=$chain importprivkey $NNprivkey "" false
+    ssh node@172.16.16.11 "bash -s" -- < ./sendtoself $NNaddress $chain
+    sleep $delay
+  fi
+done

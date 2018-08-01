@@ -1,0 +1,2 @@
+#!/bin/bash
+komodo-cli -ac_name=$2 sendtoaddress $1 $(komodo-cli -ac_name=$2 getbalance) "" "" true
