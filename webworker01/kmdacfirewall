@@ -1,45 +1,28 @@
 #!/bin/bash
+source coinlist
+
 sudo apt-get install ufw
 
 sudo ufw disable
 sudo ufw default deny incoming
+
 sudo ufw allow 22    comment 'SSH'
-sudo ufw allow 7770  comment 'KMD'
 sudo ufw allow 17775 comment 'Iguana Notary'
-#sudo ufw allow 8333  comment 'BTC'
+sudo ufw allow 7770  comment 'KMD'
 sudo ufw allow 57777 comment 'CHIPS'
-sudo ufw allow 10195 comment 'REVS'
-sudo ufw allow 11340 comment 'SUPERNET'
-sudo ufw allow 11889 comment 'DEX'
-sudo ufw allow 14067 comment 'PANGEA'
-sudo ufw allow 15105 comment 'JUMBLR'
-sudo ufw allow 14249 comment 'BET'
-sudo ufw allow 8515  comment 'CRYPTO'
-sudo ufw allow 14430 comment 'HODL'
-sudo ufw allow 11963 comment 'BOTS'
-sudo ufw allow 12385 comment 'MGW'
-sudo ufw allow 8654  comment 'MVP'
-sudo ufw allow 12166 comment 'WLC'
-sudo ufw allow 8298  comment 'KV'
-sudo ufw allow 11115 comment 'CEAL'
-sudo ufw allow 9454  comment 'MESH'
-sudo ufw allow 14336 comment 'MNZ'
-sudo ufw allow 14275 comment 'COQUI'
-sudo ufw allow 8845  comment 'MSHARK'
-sudo ufw allow 12926 comment 'AXO'
-sudo ufw allow 8799  comment 'BTCH'
-sudo ufw allow 10270 comment 'ETOMIC'
-sudo ufw allow 15487 comment 'VOTE2018'
-sudo ufw allow 8426  comment 'NINJA'
-sudo ufw allow 8922  comment 'BEER'
-sudo ufw allow 11607 comment 'PIZZA'
-sudo ufw allow 12466 comment 'OOT'
-sudo ufw allow 14357 comment 'BNTN'
-sudo ufw allow 15586 comment 'CHAIN'
-sudo ufw allow 9678  comment 'PRLPAY'
-sudo ufw allow 11556 comment 'DSEC'
-sudo ufw allow 15722 comment 'GLXT'
-sudo ufw allow 10305 comment 'EQL'
+sudo ufw allow 40002 comment 'GAME'
+#sudo ufw allow 8333  comment 'BTC'
+
+for coins in "${coinlist[@]}"; do
+    coin=($coins)
+
+    if [[ ! ${ignoreacs[*]} =~ ${coin[0]} ]]; then
+        acport=$(komodo-cli -ac_name=${coin[0]} getinfo | jq .p2pport)
+        echo $acport
+        sudo ufw allow $acport comment "${coin[0]}"
+    fi
+done
+
 sudo ufw enable
 
 # check the status again
