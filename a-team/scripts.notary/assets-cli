@@ -1,0 +1,16 @@
+#!/bin/bash
+declare -a skip=("BEER" "PIZZA")
+args="${@}"
+delay=0.5
+
+~/komodo/src/listassetchains | while read chain; do
+  if [[ " ${skip[@]} " =~ " ${chain} " ]]; then
+    pointless=0
+  else
+    echo $chain
+    komodo-cli -ac_name=$chain $args
+    sleep $delay
+  fi
+done
+echo VRSC
+komodo-cli -ac_name=VRSC $args

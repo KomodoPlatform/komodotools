@@ -1,0 +1,33 @@
+#!/bin/bash
+# OpeSSL 1.0.x build script (c) Decker
+version=1.0.2j
+BDB_PREFIX="~/chips3/db4/"
+cd ~/GameCredits
+
+curdir=$(pwd)
+mkdir build
+wget -qO- http://www.openssl.org/source/openssl-$version.tar.gz | tar xzv
+cd openssl-$version
+./config --prefix=$curdir/build
+make -j$(nproc)
+make install
+cd ..
+
+# Configure GameCredits Core to use our own-built instance of BDB
+cd $gamecredits_ROOT
+./autogen.sh
+./configure LDFLAGS="-L${BDB_PREFIX}/lib/ -L${curdr}/build/export CXXFLAGS+=" -I<full_path_to_build_folder>/include/openssl-1.0"
+export LDFLAGS+=" -L<full_path_to_build_folder>/lib/openssl-1.0 -lssl"
+export CXXFLAGS+=" -fpic"
+
+./autogen.sh
+./configure
+make -j4" CPPFLAGS="-I${BDB_PREFIX}/include/" 
+make -j$(nproc)
+export CXXFLAGS+=" -I<full_path_to_build_folder>/include/openssl-1.0"
+export LDFLAGS+=" -L<full_path_to_build_folder>/lib/openssl-1.0 -lssl"
+export CXXFLAGS+=" -fpic"
+
+./autogen.sh
+./configure
+make -j4

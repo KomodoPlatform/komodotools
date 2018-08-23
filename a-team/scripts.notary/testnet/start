@@ -1,0 +1,7 @@
+#!/bin/bash
+source ~/komodo/src/pubkey.txt
+echo "Starting Komodo"
+komodod -notary -pubkey=$pubkey &
+sleep 90
+echo "Starting PIZZA"
+./startassets
