@@ -20,6 +20,7 @@ declare -A repos=(
 [SUPERNET]='$HOME/SuperNET origin/dev'
 [CHIPS]='$HOME/chips3 origin/dev'
 [GAME]='/home/gamecredits/GameCredits origin/master'
+[HUSH]='/home/hush/hush origin/dev'
 )
 
 #==End Options==
@@ -74,7 +75,7 @@ checkRepo () {
     if [ $localrev != $remoterev ]; then
         printf "$color_red[U]$color_reset"
     fi
-    
+
     case $1 in
         KMD)
             printf "     "
@@ -103,8 +104,10 @@ timefilter2=1525513998
 format="%-11s %6s %6s %7s %.12s %6s %6s %6s"
 
 othercoins=(
+'BTC bitcoin-cli'
 'CHIPS chips-cli'
 'GAME gamecredits-cli'
+'HUSH hush-cli'
 )
 
 outputstats ()
@@ -115,18 +118,6 @@ outputstats ()
 
     printf "\n\n"
     printf "%-11s %6s %6s %7s %12s %6s %6s %6s\n" "-ASSET-" "-NOTR-" "-UTXO-" "-BLOX-" "-BALANCE-" "-LAST-" "-CNCT-";
-
-    btctxinfo=$(bitcoin-cli listtransactions "" $txscanamount)
-    btclastntrztime=$(echo $btctxinfo | jq -r --arg address "$btcntrzaddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
-    btcntrzd=$(echo $btctxinfo | jq --arg address "$btcntrzaddr" --arg timefilter $timefilter '[.[] | select(.time>=($timefilter|tonumber) and .address==$address and .category=="send")] | length')
-    totalntrzd=$(( $totalntrzd + $btcntrzd ))
-    printf "$format\n" "BTC" \
-            "$btcntrzd" \
-            "$(bitcoin-cli listunspent | jq --arg amt "$utxoamt" '[.[] | select(.amount==($amt|tonumber))] | length')" \
-            "$(bitcoin-cli getblockchaininfo | jq .blocks)" \
-            "$(printf "%12.8f" $(bitcoin-cli getbalance))" \
-            "$(timeSince $btclastntrztime)" \
-            "$(bitcoin-cli getnetworkinfo | jq .connections)"
 
     kmdinfo=$(komodo-cli getinfo)
     kmdtxinfo=$(komodo-cli listtransactions "" $txscanamount)
@@ -144,15 +135,25 @@ outputstats ()
     for coins in "${othercoins[@]}"; do
         coin=($coins)
 
-        if [[ ${coin[0]} == "GAME" ]]; then
-            coinsutxoamount=0.00100000
-            coinsntraddr=Gftmt8hgzgNu6f1o85HMPuwTVBMSV2TYSt
-        else
-            coinsutxoamount=$utxoamt
-            coinsntraddr=$kmdntrzaddr
-        fi
+        case ${coin[0]} in
+            BTC)
+                coinsutxoamount=$utxoamt
+                coinsntraddr=$btcntrzaddr
+                ;;
+            GAME)
+                coinsutxoamount=0.00100000
+                coinsntraddr=Gftmt8hgzgNu6f1o85HMPuwTVBMSV2TYSt
+                ;;
+            HUSH)
+                coinsutxoamount=$utxoamt
+                coinsntraddr=t1fvTULnsz9ZCcpmQ8ZSN6xhUpfkgEuqeNX
+                ;;
+            *)
+                coinsutxoamount=$utxoamt
+                coinsntraddr=$kmdntrzaddr
+                ;;
+        esac
 
-        coinsinfo=$(${coin[1]} getinfo)
         coinstxinfo=$(${coin[1]} listtransactions "" $txscanamount)
         coinslastntrztime=$(echo $coinstxinfo | jq -r --arg address "$coinsntraddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
         coinsntrzd=$(echo $coinstxinfo | jq --arg address "$coinsntraddr" --arg timefilter $timefilter2 '[.[] | select(.time>=($timefilter|tonumber) and .address==$address and .category=="send")] | length')
@@ -161,10 +162,10 @@ outputstats ()
         printf "$format\n" "${coin[0]}$(checkRepo ${coin[0]} ${repo[0]} ${repo[1]})" \
                 "$coinsntrzd" \
                 "$(${coin[1]} listunspent | jq --arg amt "$coinsutxoamount" '[.[] | select(.amount==($amt|tonumber))] | length')" \
-                "$(echo $coinsinfo | jq .blocks)" \
-                "$(printf "%12.8f" $(echo $coinsinfo | jq -r '. | (.balance|tostring)'))" \
+                "$(${coin[1]} getblockchaininfo | jq .blocks)" \
+                "$(printf "%12.8f" $(${coin[1]} getbalance))" \
                 "$(timeSince $coinslastntrztime)" \
-                "$(echo $coinsinfo | jq .connections)"
+                "$(${coin[1]} getnetworkinfo | jq .connections)"
     done
 
     lastcoin=(${coinlist[-1]})
