@@ -12,7 +12,8 @@ sudo ufw allow 7770  comment 'KMD'
 sudo ufw allow 57777 comment 'CHIPS'
 sudo ufw allow 40002 comment 'GAME'
 #sudo ufw allow 8333  comment 'BTC'
-sudo ufw allow 8888 comment 'HUSH'
+sudo ufw allow 8888  comment 'HUSH'
+sudo ufw allow 41878 comment 'EMC2'
 
 for coins in "${coinlist[@]}"; do
     coin=($coins)
