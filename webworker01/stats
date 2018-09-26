@@ -19,7 +19,7 @@ declare -A repos=(
 [KMD]='$HOME/komodo origin/dev'
 [SUPERNET]='$HOME/SuperNET origin/dev'
 [CHIPS]='$HOME/chips3 origin/dev'
-[GAME]='/home/gamecredits/GameCredits origin/master'
+[GAME]='/home/eclips/GameCredits origin/master'
 [HUSH]='/home/hush/hush origin/dev'
 )
 
