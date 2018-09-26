@@ -14,7 +14,7 @@ remotecheck2=$(curl -Ssf https://dexstats.info/api/explorerstatus.php)
 
 format="%-8s %8s %8s %8s %8s\n"
 redformat="\033[0;31m$format\033[0m"
-printf "$format" "-ASSET-" "-BLOCKS-" "-LONG-" "-RMT1-" "-RMT2-"
+#printf "$format" "-ASSET-" "-BLOCKS-" "-LONG-" "-RMT1-" "-RMT2-"
 
 #KMD
 blocks=$(komodo-cli getinfo | jq .blocks)
