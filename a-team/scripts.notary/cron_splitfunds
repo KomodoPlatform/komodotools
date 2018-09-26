@@ -22,7 +22,7 @@ splitamount () {
 now=$(date +"%Y-%m-%d %T%z")
 echo $now
 
-echo "Checking CHIPS, KMD, GAME, VRSC"
+echo "Checking CHIPS, KMD, GAME, VRSC, HUSH"
 cd ~
 echo -n CHIPS
 UTXOS="$(chips-cli listunspent | grep -c .00010000)"
@@ -67,6 +67,18 @@ if [ "$UTXOS" -lt "5" ]
      splitamount $UTXOS
      echo -n " - SPLITFUNDING VRSC: "
      RESULT="$(acsplit VRSC $SPLITAMNT)"
+     print_txid $RESULT
+   fi
+echo ""
+
+echo -n HUSH
+UTXOS="$(hush-cli listunspent | grep -c .00010000)"
+echo -n -e '\t\t';echo -n "$UTXOS"
+if [ "$UTXOS" -lt "5" ]
+   then
+     splitamount $UTXOS
+     echo -n " - SPLITFUNDING HUSH: "
+     RESULT="$(acsplit HUSH $SPLITAMNT)"
      print_txid $RESULT
    fi
 echo ""
