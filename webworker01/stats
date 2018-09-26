@@ -20,7 +20,7 @@ declare -A repos=(
 [SUPERNET]='$HOME/SuperNET origin/dev'
 [CHIPS]='$HOME/chips3 origin/dev'
 [GAME]='/home/eclips/game origin/master'
-[HUSH]='/home/hush/hush origin/dev'
+[HUSH]='/home/eclips/hush origin/dev'
 )
 
 #==End Options==
