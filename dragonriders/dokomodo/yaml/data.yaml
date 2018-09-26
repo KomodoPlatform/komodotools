@@ -1,0 +1,541 @@
+assetchains:
+  production:
+    REVS:
+      amount: 1300000
+      p2p_port: 10195
+      rpc_port: 10196
+    SUPERNET:
+      amount: 816061
+      p2p_port: 11340
+      rpc_port: 11341
+    DEX:
+      amount: 999999
+      p2p_port: 11889
+      rpc_port: 11890
+    PANGEA:
+      amount:  999999
+      p2p_port: 14067
+      rpc_port: 14068
+    JUMBLR:
+      amount: 999999
+      p2p_port: 15105
+      rpc_port: 15106
+    BET:
+      amount: 999999
+      p2p_port: 14249
+      rpc_port: 14250
+    CRYPTO:
+      amount: 999999
+      p2p_port: 12947
+      rpc_port: 12948
+    HODL: 
+      amount: 9999999
+      p2p_port: 14430
+      rpc_port: 14431
+    MSHARK:
+      amount: 1400000
+      p2p_port: 10113
+      rpc_port: 10114
+    BOTS:
+      amount: 999999
+      p2p_port: 11363 
+      rpc_port: 11364
+    MGW:
+      amount: 999999
+      p2p_port: 12385
+      rpc_port: 12386
+    COQUI:
+      amount: 72000000
+      p2p_port: 14275 
+      rpc_port: 14276
+    WLC:
+      amount: 210000000
+      p2p_port: 12166
+      rpc_port: 12167
+    KV:
+      amount: 1000000
+      p2p_port: 8298
+      rpc_port: 8299
+    CEAL:
+      amount: 366666666
+      p2p_port: 11115
+      rpc_port: 11116
+    MESH:
+      amount: 1000007
+      p2p_port: 9454
+      rpc_port: 9455
+    MNZ:
+      amount: 257142858
+      p2p_port: 14336
+      rpc_port: 14337
+    AXO:
+      amount: 200000000
+      p2p_port: 12926
+      rpc_port: 12927
+    ETOMIC:
+      amount: 100000000
+      p2p_port: 10270
+      rpc_port: 10271
+    BTCH:
+      amount: 20998641
+      p2p_port: 8799
+      rpc_port: 8800
+    VOTE2018:
+      amount: 600000000
+      p2p_port: 10316
+      rpc_port: 10317
+    NINJA:
+      amount: 100000000
+      p2p_port: 15430
+      rpc_port: 15431
+
+  development:
+    PIZZA:
+      amount: 100000000
+      p2p_port: 11607 
+      rpc_port: 11608
+    BEER:
+      amount: 100000000
+      p2p_port: 8922
+      rpc_port: 8923  
+
+  test:
+    TXSCL:
+      amount: 100000000
+      p2p_port: 11820
+      rpc_port: 11821
+    TXSCL000:
+      amount: 100000000
+      p2p_port: 13272
+      rpc_port: 13273
+    TXSCL001:
+      amount: 100000000
+      p2p_port: 11997
+      rpc_port: 11998
+    TXSCL002:
+      amount: 100000000
+      p2p_port: 12739
+      rpc_port: 12740
+    TXSCL003:
+      amount: 100000000
+      p2p_port: 15564
+      rpc_port: 15565
+    TXSCL004:
+      amount: 100000000
+      p2p_port: 8160
+      rpc_port: 8161
+    TXSCL005:
+      amount: 100000000
+      p2p_port: 13663
+      rpc_port: 13664
+    TXSCL006:
+      amount: 100000000
+      p2p_port: 8457
+      rpc_port: 8458
+    TXSCL007:
+      amount: 100000000
+      p2p_port: 15750
+      rpc_port: 15751
+    TXSCL008:
+      amount: 100000000
+      p2p_port: 12561
+      rpc_port: 12562
+    TXSCL00a:
+      amount: 100000000
+      p2p_port: 8594
+      rpc_port: 8595
+    TXSCL00b:
+      amount: 100000000
+      p2p_port: 14497
+      rpc_port: 14498
+    TXSCL00c:
+      amount: 100000000
+      p2p_port: 13513
+      rpc_port: 13514
+    TXSCL00d:
+      amount: 100000000
+      p2p_port: 13250
+      rpc_port: 13251
+    TXSCL00e:
+      amount: 100000000
+      p2p_port: 15705
+      rpc_port: 15706
+    TXSCL00f:
+      amount: 100000000
+      p2p_port: 12034
+      rpc_port: 12035
+    TXSCL010:
+      amount: 100000000
+      p2p_port: 8973
+      rpc_port: 8974
+    TXSCL011:
+      amount: 100000000
+      p2p_port: 9472
+      rpc_port: 9473
+    TXSCL012:
+      amount: 100000000
+      p2p_port: 15604
+      rpc_port: 15605
+    TXSCL013:
+      amount: 100000000
+      p2p_port: 13995
+      rpc_port: 13996
+    TXSCL014:
+      amount: 100000000
+      p2p_port: 10769
+      rpc_port: 10770
+    TXSCL015:
+      amount: 100000000
+      p2p_port: 14641
+      rpc_port: 14642
+    TXSCL016:
+      amount: 100000000
+      p2p_port: 15592
+      rpc_port: 15593
+    TXSCL017:
+      amount: 100000000
+      p2p_port: 15046
+      rpc_port: 15047
+    TXSCL018:
+      amount: 100000000
+      p2p_port: 11106
+      rpc_port: 11107
+    TXSCL019:
+      amount: 100000000
+      p2p_port: 12614
+      rpc_port: 12615
+    TXSCL01a:
+      amount: 100000000
+      p2p_port: 10584
+      rpc_port: 10585
+    TXSCL01b:
+      amount: 100000000
+      p2p_port: 8555
+      rpc_port: 8556
+    TXSCL01c:
+      amount: 100000000
+      p2p_port: 12887
+      rpc_port: 12888
+    TXSCL01d:
+      amount: 100000000
+      p2p_port: 13677
+      rpc_port: 13678
+    TXSCL01e:
+      amount: 100000000
+      p2p_port: 14188
+      rpc_port: 14189
+    TXSCL01f:
+      amount: 100000000
+      p2p_port: 9595
+      rpc_port: 9596
+    TXSCL020:
+      amount: 100000000
+      p2p_port: 12369
+      rpc_port: 12370
+    TXSCL021:
+      amount: 100000000
+      p2p_port: 13399
+      rpc_port: 13400
+    TXSCL022:
+      amount: 100000000
+      p2p_port: 11462
+      rpc_port: 11463
+    TXSCL023:
+      amount: 100000000
+      p2p_port: 14020
+      rpc_port: 14021
+    TXSCL024:
+      amount: 100000000
+      p2p_port: 14290
+      rpc_port: 14291
+    TXSCL025:
+      amount: 100000000
+      p2p_port: 15264
+      rpc_port: 15265
+    TXSCL026:
+      amount: 100000000
+      p2p_port: 10699
+      rpc_port: 10700
+    TXSCL027:
+      amount: 100000000
+      p2p_port: 9005
+      rpc_port: 9006
+    TXSCL028:
+      amount: 100000000
+      p2p_port: 15443
+      rpc_port: 15444
+    TXSCL029:
+      amount: 100000000
+      p2p_port: 14233
+      rpc_port: 14234
+    TXSCL02a:
+      amount: 100000000
+      p2p_port: 10183
+      rpc_port: 10184
+    TXSCL02b:
+      amount: 100000000
+      p2p_port: 8438
+      rpc_port: 8439
+    TXSCL02c:
+      amount: 100000000
+      p2p_port: 15069
+      rpc_port: 15070
+    TXSCL02d:
+      amount: 100000001
+      p2p_port: 8038
+      rpc_port: 8039
+    TXSCL02e:
+      amount: 100000000
+      p2p_port: 15776
+      rpc_port: 15777
+    TXSCL02f:
+      amount: 100000000
+      p2p_port: 8914
+      rpc_port: 8915
+    TXSCL030:
+      amount: 100000000
+      p2p_port: 15083
+      rpc_port: 15084
+    TXSCL031:
+      amount: 100000000
+      p2p_port: 9137
+      rpc_port: 9138
+    TXSCL032:
+      amount: 100000000
+      p2p_port: 15132
+      rpc_port: 15133
+    TXSCL033:
+      amount: 100000000
+      p2p_port: 9145
+      rpc_port: 9146
+    TXSCL034:
+      amount: 100000000
+      p2p_port: 8358
+      rpc_port: 8359
+    TXSCL035:
+      amount: 100000000
+      p2p_port: 14505
+      rpc_port: 14506
+    TXSCL036:
+      amount: 100000000
+      p2p_port: 10862
+      rpc_port: 10863
+    TXSCL037:
+      amount: 100000000
+      p2p_port: 12772
+      rpc_port: 12773
+    TXSCL038:
+      amount: 100000000
+      p2p_port: 11177
+      rpc_port: 11178
+    TXSCL039:
+      amount: 100000000
+      p2p_port: 13042
+      rpc_port: 13043
+    TXSCL03a:
+      amount: 100000000
+      p2p_port: 14984
+      rpc_port: 14985
+    TXSCL03b:
+      amount: 100000000
+      p2p_port: 15626
+      rpc_port: 15627
+    TXSCL03c:
+      amount: 100000000
+      p2p_port: 14366
+      rpc_port: 14367
+    TXSCL03d:
+      amount: 100000000
+      p2p_port: 8793
+      rpc_port: 8794
+    TXSCL03e:
+      amount: 100000000
+      p2p_port: 9293
+      rpc_port: 9294
+    TXSCL03f:
+      amount: 100000000
+      p2p_port: 11828
+      rpc_port: 11829
+    TXSCL040:
+      amount: 100000000
+      p2p_port: 14637
+      rpc_port: 14638
+    TXSCL041:
+      amount: 100000000
+      p2p_port: 15489
+      rpc_port: 15490
+    TXSCL042:
+      amount: 100000000
+      p2p_port: 15378
+      rpc_port: 15379
+    TXSCL044:
+      amount: 100000000
+      p2p_port: 15243
+      rpc_port: 15244
+    TXSCL045:
+      amount: 100000000
+      p2p_port: 10524
+      rpc_port: 10525
+    TXSCL046:
+      amount: 100000000
+      p2p_port: 12924
+      rpc_port: 12925
+    TXSCL047:
+      amount: 100000000
+      p2p_port: 14885
+      rpc_port: 14886
+    TXSCL048:
+      amount: 100000000
+      p2p_port: 13528
+      rpc_port: 13529
+    TXSCL049:
+      amount: 100000000
+      p2p_port: 11181
+      rpc_port: 11182
+    TXSCL04a:
+      amount: 100000000
+      p2p_port: 13893
+      rpc_port: 13894
+    TXSCL04b:
+      amount: 100000000
+      p2p_port: 12872
+      rpc_port: 12873
+    TXSCL04c:
+      amount: 100000000
+      p2p_port: 9443
+      rpc_port: 9444
+    TXSCL04d:
+      amount: 100000000
+      p2p_port: 9725
+      rpc_port: 9726
+    TXSCL04e:
+      amount: 100000000
+      p2p_port: 10053
+      rpc_port: 10054
+    TXSCL04f:
+      amount: 100000000
+      p2p_port: 14330
+      rpc_port: 14331
+    TXSCL050:
+      amount: 100000000
+      p2p_port: 11145
+      rpc_port: 11146
+    TXSCL051:
+      amount: 100000000
+      p2p_port: 13771
+      rpc_port: 13772
+    TXSCL052:
+      amount: 100000000
+      p2p_port: 9659
+      rpc_port: 9660
+    TXSCL053:
+      amount: 100000000
+      p2p_port: 13700
+      rpc_port: 13701
+    TXSCL054:
+      amount: 100000000
+      p2p_port: 8244
+      rpc_port: 8245
+    TXSCL055:
+      amount: 100000000
+      p2p_port: 9671
+      rpc_port: 9672
+    TXSCL056:
+      amount: 100000000
+      p2p_port: 14113
+      rpc_port: 14114
+    TXSCL057:
+      amount: 100000000
+      p2p_port: 8235
+      rpc_port: 8236
+    TXSCL058:
+      amount: 100000000
+      p2p_port: 10242
+      rpc_port: 10243
+    TXSCL059:
+      amount: 100000000
+      p2p_port: 10624
+      rpc_port: 10625
+    TXSCL05a:
+      amount: 100000000
+      p2p_port: 15076
+      rpc_port: 15077
+    TXSCL05b:
+      amount: 100000000
+      p2p_port: 15514
+      rpc_port: 15515
+    TXSCL05c:
+      amount: 100000000
+      p2p_port: 9624
+      rpc_port: 9625
+    TXSCL05d:
+      amount: 100000000
+      p2p_port: 11983
+      rpc_port: 11984
+    TXSCL05e:
+      amount: 100000000
+      p2p_port: 10367
+      rpc_port: 10368
+    TXSCL05f:
+      amount: 100000000
+      p2p_port: 10060
+      rpc_port: 10061
+    TXSCL060:
+      amount: 100000000
+      p2p_port: 8886
+      rpc_port: 8887
+    TXSCL061:
+      amount: 100000000
+      p2p_port: 13417
+      rpc_port: 13418
+    TXSCL062:
+      amount: 100000000
+      p2p_port: 13947
+      rpc_port: 13948
+    TXSCL063:
+      amount: 100000000
+      p2p_port: 13004
+      rpc_port: 13005
+    TXSCL064:
+      amount: 100000001
+      p2p_port: 14899
+      rpc_port: 14900
+    TXSCL065:
+      amount: 100000000
+      p2p_port: 10515
+      rpc_port: 10516
+    TXSCL066:
+      amount: 100000000
+      p2p_port: 10236
+      rpc_port: 10237
+    TXSCL067:
+      amount: 100000000
+      p2p_port: 14752
+      rpc_port: 14753
+    TXSCL068:
+      amount: 100000000
+      p2p_port: 11562
+      rpc_port: 11563
+    TXSCL069:
+      amount: 100000000
+      p2p_port: 10600
+      rpc_port: 10601
+    TXSCL06a:
+      amount: 100000000
+      p2p_port: 9860
+      rpc_port: 9861
+    TXSCL06b:
+      amount: 100000000
+      p2p_port: 13425
+      rpc_port: 13426
+    TXSCL06c:
+      amount: 100000000
+      p2p_port: 13846
+      rpc_port: 13847
+    TXSCL06d:
+      amount: 100000000
+      p2p_port: 14456
+      rpc_port: 14457
+
+# seed_host: zero.kolo.supernet.org
+seed_host: 54.36.176.84

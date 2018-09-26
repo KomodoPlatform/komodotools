@@ -1,0 +1,9 @@
+ruamel.yaml
+Jinja2
+requests
+click
+py
+ipython
+configparser
+colorama
+python-bitcoinrpc

@@ -1,0 +1,5 @@
+#!/bin/bash
+# Rsync .komodo folder from seed node
+rsync -avzh node@172.16.16.11:/mnt/komodo_data/ /mnt/ramdisk
+# Delete all wallet.dat's
+find /mnt/ramdisk -name 'wallet.dat' -delete

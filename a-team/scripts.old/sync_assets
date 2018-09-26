@@ -1,0 +1,19 @@
+#!/bin/bash
+seed_ip=`getent hosts seed.mewhub.com | awk '{ print $1 }'`
+source coinlist
+count=0
+delay=20
+
+while [ "x${coinlist[count]}" != "x" ]
+do
+  all=${coinlist[count]}
+  name=${all%% *}
+  supply=`expr "$all" : '.* \(.*\)'`
+  if [ "$name" != "" ]
+    then
+     echo $name 
+     komodod -ac_name=$name -ac_supply=$supply -addnode=$seed_ip $1 &
+     sleep $delay
+    fi
+  count=$(( $count +1 ))
+done

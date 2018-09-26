@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# IT JUST DOES ECHO !!! nothing added, nothing changed just a list of everything
+
+# VERIFY BEFORE USING COMMANDS THAT EVERYTHING SUITS THE BEHAVIOUR YOU EXPECT !!!
+
+
+
+cd $HOME
+cd .komodo
+echo "# POLICIES "
+echo "sudo iptables -P INPUT ACCEPT"
+echo "sudo iptables -P FORWARD ACCEPT"
+echo "sudo iptables -P OUTPUT ACCEPT"
+echo "# localhost"
+echo "sudo iptables -A INPUT -i lo -j ACCEPT"
+echo "# established"
+echo "sudo iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT"
+echo "# SSH : adapt it !"
+echo "sudo iptables -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT"
+echo "# CHIPS / IGUANA_TESTNET/ IGUANA_MAINNET / BTC "
+echo "sudo iptables -A INPUT -p tcp -m multiport --dports 57777,7000,7770,7775,8333 -j ACCEPT"
+
+
+for D in *; do
+    if [ -d "${D}" ]; then
+        if [ -f ~/.komodo/${D}/${D}.conf ]
+        then
+                echo "# Assetchain - ${D}"
+                rpcport=$(sed -n -e '/^rpcport=/p' ~/.komodo/${D}/${D}.conf | cut -d "=" -f2)
+                echo "sudo iptables -A INPUT -p tcp --dport $((rpcport-1)) -j ACCEPT"
+        fi
+    fi
+done
+
+echo "# DENY ELSE"
+echo "sudo iptables -A INPUT -j DROP"
+
+cd

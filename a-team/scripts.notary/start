@@ -1,0 +1,16 @@
+#!/bin/bash
+source ~/komodo/src/pubkey.txt
+args="-pubkey=$pubkey -connect=172.16.16.11" # -addnode=37.9.62.186 -addnode=209.58.144.205 -addnode=167.99.69.47"
+
+echo "Starting Bitcoin"
+bitcoind &
+sleep 30
+echo "Starting Komodo"
+komodod -notary $args &
+sleep 60
+echo "Starting Chips"
+chipsd $args &
+echo "Starting GameCredits"
+gamecreditsd $args &
+#echo "Starting Hush"
+#hushd $args &

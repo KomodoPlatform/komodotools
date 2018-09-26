@@ -1,0 +1,11 @@
+{% for assetname, asset in items.items() %}
+komodod -pubkey={{ btcpubkey }} -ac_name={{ assetname }} -ac_supply={{ asset.amount 
+  }} -addnode={{ seed_ip }}{% for mine in mined %}
+      {% if assetname in mine %} -gen{% endif %}
+      {% if 'random' in mine %}
+      {% if range(0, 32767) | random % 10 == 1 %}
+      -gen{% endif %}
+      {% endif %}
+      {% endfor %}
+
+{% endfor %}

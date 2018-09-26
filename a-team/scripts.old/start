@@ -1,0 +1,10 @@
+#!/bin/bash
+source ~/komodo/src/pubkey.txt
+echo "Starting Bitcoin"
+bitcoind &
+sleep 10
+echo "Starting Chips"
+chipsd &
+sleep 10
+echo "Starting Komodo"
+komodod -gen -genproclimit=7 -notary -pubkey=$pubkey &

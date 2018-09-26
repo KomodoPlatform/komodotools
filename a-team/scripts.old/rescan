@@ -1,0 +1,12 @@
+#!/bin/bash
+echo "Rescanning Bitcoin"
+bitcoind -rescan &
+sleep 120
+echo "Rescanning Chips"
+chipsd -rescan &
+sleep 120
+echo "Rescanning Komodo"
+komodod -rescan &
+sleep 3600
+echo "Rescanning Assets"
+./sync_assets -rescan

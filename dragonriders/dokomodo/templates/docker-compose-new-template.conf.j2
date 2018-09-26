@@ -1,0 +1,63 @@
+# vim: ts=2 sw=2 et
+version: '3'
+
+services:
+  {% for assetname, asset in items.items() %}
+  {{ assetname }}:
+    image: {{ image_name }}
+    # network_mode: "host"
+    networks:
+      - komodo
+    ports:
+      {% if asset.iguana_payload.rpc %}
+      - "127.0.0.1:{{ asset.iguana_payload.rpc }}:{{ asset.iguana_payload.rpc }}"
+      {% endif %}
+      {% if asset.iguana_payload.p2p %}
+      - "127.0.0.1:{{ asset.iguana_payload.p2p }}:{{ asset.iguana_payload.p2p }}"
+      {% endif %}
+    volumes:
+      - komodo-data:/home/komodo/.komodo
+      - shared-data:/home/komodo/.shared:ro
+    environment:
+      - ASSET_RPC_USER=${ASSET_RPC_USER}
+      - ASSET_RPC_PASSWORD=${ASSET_RPC_PASSWORD}
+      - ASSET_RPC_WORKQUEUE=64
+      - ASSET_BIND=127.0.0.1
+      - ASSET_RPC_BIND=0.0.0.0
+      - ASSET_RPC_ALLOWIP=0.0.0.0/0
+      - ASSET_RPC_PORT={{ asset.iguana_payload.rpc }}
+      - ASSET_NAME={{ assetname }}
+      - KOMODO_RPC_USER=${KOMODO_RPC_USER}
+      - KOMODO_RPC_PASSWORD=${KOMODO_RPC_PASSWORD}
+      # - KOMODO_BIND = ${KOMODO_BIND}
+      # - KOMODO_RPC_BIND = ${KOMODO_RPC_BIND}
+      # - KOMODO_RPC_ALLOWIP = ${KOMODO_RPC_ALLOWIP}
+
+    command: >
+      bash -c "komodod -pubkey={{ btcpubkey }}
+      -ac_name={{ assetname }}
+      -ac_supply={{ asset.supply }}
+      -addnode={{ seed_ip }}{% for mine in mined %}
+      {% if assetname in mine %} -gen{% endif %}
+      {% if 'random' in mine %}
+      {% if range(0, 32767) | random % 10 == 1 %}
+      -gen{% endif %}
+      {% endif %}
+      {% endfor %}"
+
+  {% endfor %}
+
+volumes:
+  komodo-data:
+    driver_opts:
+      type: none
+      device: ${KOMODO_DATA}
+      o: bind
+  shared-data:
+    driver_opts:
+      type: none
+      device: ${SHARED_DATA}
+      o: bind
+
+networks:
+  komodo:
