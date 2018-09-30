@@ -73,7 +73,7 @@ checkRepo () {
     remoterev=$(git rev-parse $3)
     cd $prevdir
 
-    if [ $localrev != $remoterev ]; then
+    if [ $localrev != $remoterev ] || [[ "$1" == "HUSH" ]]; then
         printf "$color_red[U]$color_reset"
     fi
 
@@ -85,6 +85,9 @@ checkRepo () {
             printf "   "
             ;;
         GAME)
+            printf "    "
+            ;;
+        HUSH)
             printf "    "
             ;;
     esac
