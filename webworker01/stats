@@ -87,6 +87,9 @@ checkRepo () {
         GAME)
             printf "    "
             ;;
+        HUSH)
+            printf "    "
+            ;;
     esac
 }
 
