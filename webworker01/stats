@@ -154,7 +154,7 @@ outputstats ()
                 coinsntraddr=t1fvTULnsz9ZCcpmQ8ZSN6xhUpfkgEuqeNX
                 ;;
             EMC2)
-                coinsutxoamount=$utxoamt
+                coinsutxoamount=0.00100000
                 coinsntraddr=EfCkxbDFSn4X1VKMzyckyHaXLf4ithTGoM
                 ;;
             *)
