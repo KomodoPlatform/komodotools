@@ -14,7 +14,7 @@ remotecheck2=$(curl -Ssf https://dexstats.info/api/explorerstatus.php)
 
 format="%-8s %8s %8s %8s %8s\n"
 redformat="\033[0;31m$format\033[0m"
-printf "$format" "-ASSET-" "-BLOCKS-" "-LONG-" "-RMT1-" "-RMT2-"
+#printf "$format" "-ASSET-" "-BLOCKS-" "-LONG-" "-RMT1-" "-RMT2-"
 
 #KMD
 blocks=$(komodo-cli getinfo | jq .blocks)
@@ -36,7 +36,7 @@ if (( diff2 < variance * -1 )) || (( diff2 > variance )); then
     forked=true
     thisformat=$redformat
 fi
-printf "$thisformat" "KMD" "$blocks" "$longest" "$remoteblocks" "$remoteblocks2"
+#printf "$thisformat" "KMD" "$blocks" "$longest" "$remoteblocks" "$remoteblocks2"
 
 #CHIPS
 blocks=$(chips-cli getinfo | jq .blocks)
@@ -52,7 +52,7 @@ if (( diff1 < variance * -1 )) || (( diff1 > variance )); then
     forked=true
     thisformat=$redformat
 fi
-printf "$thisformat" "CHIPS" "$blocks" "$longest" "$remoteblocks"
+#printf "$thisformat" "CHIPS" "$blocks" "$longest" "$remoteblocks"
 
 #GAME
 blocks=$(gamecredits-cli getinfo | jq .blocks)
@@ -63,7 +63,7 @@ if (( diff1 < variance * -1 )) || (( diff1 > variance )); then
     forked=true
     thisformat=$redformat
 fi
-printf "$thisformat" "GAME" "$blocks" " " "$remoteblocks"
+#printf "$thisformat" "GAME" "$blocks" " " "$remoteblocks"
 
 for coins in "${coinlist[@]}"; do
     coin=($coins)
@@ -89,7 +89,7 @@ for coins in "${coinlist[@]}"; do
             forked=true
             thisformat=$redformat
         fi
-        printf "$thisformat" "${coin[0]}" "$blocks" "$longest" "$remoteblocks" "$remoteblocks2"
+        #printf "$thisformat" "${coin[0]}" "$blocks" "$longest" "$remoteblocks" "$remoteblocks2"
     fi
 done
 
