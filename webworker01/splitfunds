@@ -1,6 +1,6 @@
 #!/bin/bash
 # Local split version by webworker01
-# Original version by Split NN script by Decker (c) 2018
+# Original version by Decker (c) 2018 <https://github.com/DeckerSU/komodo_scripts/blob/master/split_nn_sapling.sh>
 #
 # Usage:  ./splitfunds <COINNAME> <numutxos>
 
@@ -12,6 +12,8 @@ NN_ADDRESS=
 NN_PUBKEY=
 #your rmd160 value
 NN_HASH160=
+
+komodoexec=/usr/local/bin/komodo-cli
 
 #==End Options==
 
@@ -33,7 +35,7 @@ if [[ ! -z $SPLIT_COUNT ]] && (( SPLIT_COUNT > 252 )); then
 elif [[ ! -z $SPLIT_COUNT ]] && (( SPLIT_COUNT > 0 )); then
     SPLIT_COUNT=$2
 else
-    echo "it wasn't a number"
+    #it wasn't a number, default to 50
     SPLIT_COUNT=50
     exit;
 fi
@@ -44,16 +46,13 @@ SPLIT_TOTAL=$(jq -n "$SPLIT_VALUE*$SPLIT_COUNT")
 SPLIT_TOTAL_SATOSHI=$(jq -n "$SPLIT_VALUE*$SPLIT_COUNT*100000000")
 
 #Get lowest amount and valid utxo to split
-utxo=$(komodo-cli $asset listunspent | jq -r --arg minsize $SPLIT_TOTAL '[.[] | select(.amount>($minsize|tonumber) and .generated==false and .confirmations>0)] | sort_by(.amount)[0]')
+utxo=$($komodoexec $asset listunspent | jq -r --arg minsize $SPLIT_TOTAL '[.[] | select(.amount>($minsize|tonumber) and .generated==false and .confirmations>0)] | sort_by(.amount)[0]')
 
 if [[ $utxo != "null" ]]; then
 
     txid=$(echo "$utxo" | jq -r .txid)
     vout=$(echo "$utxo" | jq -r .vout)
     amount=$(echo "$utxo" | jq -r .amount)
-
-    echo "Amount: $amount"
-    echo "2Split: $SPLIT_TOTAL ($SPLIT_TOTAL_SATOSHI)"
 
     rev_txid=$(echo $txid | dd conv=swab 2> /dev/null | rev)
     vout_hex=$(printf "%08x" $vout | dd conv=swab 2> /dev/null | rev)
@@ -73,7 +72,6 @@ if [[ $utxo != "null" ]]; then
     done
 
     change=$(echo "$amount*100000000-$SPLIT_TOTAL_SATOSHI/1*1" | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//')
-    echo "Change: $change"
 
     value=$(printf "%016x" $change | dd conv=swab 2> /dev/null | rev)
 
@@ -84,10 +82,11 @@ if [[ $utxo != "null" ]]; then
     rawtx=$rawtx$nlocktime
     rawtx=$rawtx"000000000000000000000000000000" # sapling end of tx
 
-    signedtx=$(komodo-cli $asset signrawtransaction $rawtx | jq -r '.hex')
+    signedtx=$($komodoexec $asset signrawtransaction $rawtx | jq -r '.hex')
 
     if [[ ! -z $signedtx ]]; then
-        komodo-cli $asset sendrawtransaction $signedtx
+        txid=$($komodoexec $asset sendrawtransaction $signedtx)
+        echo "$coin Split $SPLIT_TOTAL TXID: $txid"
     fi
 else
   echo -e "Error! No UTXOs to split :(("
