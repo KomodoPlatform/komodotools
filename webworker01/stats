@@ -9,7 +9,7 @@
 sleepytime=600
 
 #How many transactions back to scan for notarizations
-txscanamount=77777
+txscanamount=777
 
 #You can modify this list of ACs to exclude or comment out the line to show all
 ignoreacs=('VOTE2018' 'BEER' 'PIZZA')
@@ -39,16 +39,16 @@ timeSince () {
         local m=$((t/60%60))
         local s=$((t%60))
 
-        if [[ $d > 0 ]]; then
-            echo -n "${d}d"
+        if (( d > 0 )); then
+            echo -n "${d}D"
         fi
-        if [[ $h > 0 ]]; then
+        if (( d < 2 && h > 0 )); then
             echo -n "${h}h"
         fi
-        if [[ $d = 0 && $m > 0 ]]; then
+        if (( d == 0 && h < 4 && m > 0 )); then
             echo -n "${m}m"
         fi
-        if [[ $d = 0 && $h = 0 && $m = 0 ]]; then
+        if (( d == 0 && h == 0 && m == 0 )); then
             echo -n "${s}s"
         fi
 
@@ -90,6 +90,9 @@ checkRepo () {
         HUSH)
             printf "    "
             ;;
+        EMC2)
+            printf "    "
+            ;;
     esac
 }
 
@@ -105,7 +108,7 @@ timefilter=1525032458
 #Second time filter for assetchains (SuperNET commit 07515fb)
 timefilter2=1525513998
 
-format="%-11s %6s %6s %7s %.12s %6s %6s %6s"
+format="%-11s %6s %6s %7s %.8s %6s %6s %5s %6s"
 
 othercoins=(
 'BTC bitcoin-cli'
@@ -122,19 +125,21 @@ outputstats ()
     now=$(date +"%H:%M")
 
     printf "\n\n"
-    printf "%-11s %6s %6s %7s %12s %6s %6s %6s\n" "-ASSET-" "-NOTR-" "-UTXO-" "-BLOX-" "-BALANCE-" "-LAST-" "-CNCT-";
+    printf "%-11s %6s %6s %7s %8s %6s %5s %6s\n" "-ASSET-" "-NOTR-" "-UTXO-" "-BLOX-" "-BAL-" "-LAST-" "-CON-" "-SIZE-";
 
     kmdinfo=$(komodo-cli getinfo)
     kmdtxinfo=$(komodo-cli listtransactions "" $txscanamount)
     kmdlastntrztime=$(echo $kmdtxinfo | jq -r --arg address "$kmdntrzaddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
+    kmdutxos=$(komodo-cli listunspent | jq --arg amt "$utxoamt" '[.[] | select(.amount==($amt|tonumber))] | length')
     repo=(${repos[KMD]})
     printf "$format\n" "KMD$(checkRepo KMD ${repo[0]} ${repo[1]})" \
-            " " \
-            "$(komodo-cli listunspent | jq --arg amt "$utxoamt" '[.[] | select(.amount==($amt|tonumber))] | length')" \
+            "" \
+            "$kmdutxos" \
             "$(echo $kmdinfo | jq .blocks)" \
-            "$(printf "%12.8f" $(echo $kmdinfo | jq .balance))" \
+            "$(printf "%8.3f" $(echo $kmdinfo | jq .balance))" \
             "$(timeSince $kmdlastntrztime)" \
             "$(echo $kmdinfo | jq .connections)" \
+            "$(ls -lh ~/.komodo/wallet.dat  | awk '{print $5}')" \
             "$(echo $kmdtxinfo | jq '[.[] | select(.generated==true)] | length') mined"
 
     for coins in "${othercoins[@]}"; do
@@ -166,15 +171,17 @@ outputstats ()
         coinstxinfo=$(${coin[1]} listtransactions "" $txscanamount)
         coinslastntrztime=$(echo $coinstxinfo | jq -r --arg address "$coinsntraddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
         coinsntrzd=$(echo $coinstxinfo | jq --arg address "$coinsntraddr" --arg timefilter $timefilter2 '[.[] | select(.time>=($timefilter|tonumber) and .address==$address and .category=="send")] | length')
+        otherutxo=$(${coin[1]} listunspent | jq --arg amt "$coinsutxoamount" '[.[] | select(.amount==($amt|tonumber))] | length')
         totalntrzd=$(( $totalntrzd + $coinsntrzd ))
         repo=(${repos[${coin[0]}]})
         printf "$format\n" "${coin[0]}$(checkRepo ${coin[0]} ${repo[0]} ${repo[1]})" \
                 "$coinsntrzd" \
-                "$(${coin[1]} listunspent | jq --arg amt "$coinsutxoamount" '[.[] | select(.amount==($amt|tonumber))] | length')" \
+                "$otherutxo" \
                 "$(${coin[1]} getblockchaininfo | jq .blocks)" \
-                "$(printf "%12.8f" $(${coin[1]} getbalance))" \
+                "$(printf "%8.3f" $(${coin[1]} getbalance))" \
                 "$(timeSince $coinslastntrztime)" \
-                "$(${coin[1]} getnetworkinfo | jq .connections)"
+                "$(${coin[1]} getnetworkinfo | jq .connections)" \
+                ""
     done
 
     lastcoin=(${coinlist[-1]})
@@ -189,6 +196,7 @@ outputstats ()
             lastntrztime=$(echo $txinfo | jq -r --arg address "$kmdntrzaddr" '[.[] | select(.address==$address)] | sort_by(.time) | last | "\(.time)"')
             acntrzd=$(echo $txinfo | jq --arg address "$kmdntrzaddr" --arg timefilter $timefilter2 '[.[] | select(.time>=($timefilter|tonumber) and .address==$address and .category=="send")] | length')
             totalntrzd=$(( $totalntrzd + $acntrzd ))
+            acutxo=$(komodo-cli -ac_name=${coin[0]} listunspent | jq --arg amt "$utxoamt" '[.[] | select(.amount==($amt|tonumber))] | length')
             repo=(${repos[${coin[0]}]})
             laststring=""
 
@@ -198,15 +206,15 @@ outputstats ()
             if [[ ${coin[0]} == ${secondlast[0]} ]]; then
                 laststring="All:$totalntrzd"
             fi
-
             printf "$format" "${coin[0]}$(checkRepo ${coin[0]} ${repo[0]} ${repo[1]})" \
                     "$acntrzd" \
-                    "$(komodo-cli -ac_name=${coin[0]} listunspent | jq --arg amt "$utxoamt" '[.[] | select(.amount==($amt|tonumber))] | length')" \
+                    "$acutxo" \
                     "$(echo $info | jq .blocks)" \
-                    "$(printf "%12.8f" $(echo $info | jq .balance))" \
+                    "$(printf "%8.3f" $(echo $info | jq .balance))" \
                     "$(timeSince $lastntrztime)" \
                     "$(echo $info | jq .connections)" \
-                    "$laststring"
+                    "$(ls -lh ~/.komodo/${coin[0]}/wallet.dat  | awk '{print $5}')" \
+                    "$laststring" 
 
             if [[ ${coin[0]} != ${lastcoin[0]} ]]; then
                 echo

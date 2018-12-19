@@ -1,0 +1,85 @@
+#!/bin/bash
+#
+# Suggest setting up 2 crontabs, 1 for komodo and assetchains and the other hourly for longer potential blocktimes
+#
+# crontab -e
+# */15 * * * * /home/komodo/cronsplit
+# 1 * * * * /home/komodo/cronsplit long
+
+komodoexec=/usr/local/bin/komodo-cli
+
+#You can modify this list of ACs to exclude or comment out the line to show all
+ignoreacs=('VOTE2018' 'BEER' 'PIZZA')
+
+logfile=$HOME/cronsplit.log
+
+source coinlist
+
+othercoins=(
+'BTC /usr/bin/bitcoin-cli'
+'CHIPS /usr/local/bin/chips-cli'
+'GAME /usr/local/bin/gamecredits-cli'
+'HUSH /usr/local/bin/hush-cli'
+'EMC2 /usr/local/bin/einsteinium-cli'
+)
+
+sproutcoins=('OOT' 'ZILLA')
+
+kmdutxoqty=50
+acutxoqty=50
+otherutxoqty=50
+
+utxoamt=0.00010000
+splitamount=10000
+
+dt=$(date '+%Y-%m-%d %H:%M:%S');
+
+#no params in cli indicates just the short list of kmd specific coins
+if [[ -z $1 ]]; then
+    kmdutxos=$($komodoexec listunspent | jq --arg amt "$utxoamt" '[.[] | select(.amount==($amt|tonumber))] | length')
+
+    if (( kmdutxos < kmdutxoqty )); then
+        echo "KMD utxos: $kmdutxos"
+
+        splitter=$(./splitfunds KMD $kmdutxoqty)
+        echo "$dt - KMD - $splitter" >> $logfile
+    fi
+
+    for coins in "${coinlist[@]}"; do
+        coin=($coins)
+
+        if [[ ! ${ignoreacs[*]} =~ ${coin[0]} ]]; then
+            acutxo=$($komodoexec -ac_name=${coin[0]} listunspent | jq --arg amt "$utxoamt" '[.[] | select(.amount==($amt|tonumber))] | length')
+
+            if (( acutxo < acutxoqty )); then
+                if [[ ! ${sproutcoins[*]} =~ ${coin[0]} ]]; then
+                    echo "${coin[0]} utxos sapling: $acutxo"
+                    splitter=$(./splitfunds ${coin[0]} $acutxoqty)
+                else
+                    echo "${coin[0]} utxos sprout: $acutxo"
+                    splitter=$(./splitfunds ${coin[0]} $acutxoqty 0)
+                fi
+                echo "$dt - ${coin[0]} - $splitter" >> $logfile
+            fi
+        fi
+    done
+else
+    #for now any param indicates to run the long running coins (e.g. btc game chips) run this every hour or something?
+    for coins in "${othercoins[@]}"; do
+        coin=($coins)
+
+        if [[ ${coin[0]} == "GAME" ]] || [[ ${coin[0]} == "EMC2" ]]; then
+            coinsutxoamount=0.00100000
+            coinsplitamount=100000
+        else
+            coinsutxoamount=$utxoamt
+            coinsplitamount=$splitamount
+        fi
+
+        otherutxo=$(${coin[1]} listunspent | jq --arg amt "$coinsutxoamount" '[.[] | select(.amount==($amt|tonumber))] | length')
+        if (( otherutxo < otherutxoqty )); then
+            splitter=$(curl --url "http://127.0.0.1:7776" --data "{\"coin\":\"${coin[0]}\",\"agent\":\"iguana\",\"method\":\"splitfunds\",\"satoshis\":\"$coinsplitamount\",\"sendflag\":1,\"duplicates\":$otherutxoqty}")
+            echo "$dt - ${coin[0]} - $splitter" >> $logfile
+        fi
+    done
+fi
