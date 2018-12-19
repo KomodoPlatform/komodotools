@@ -1,0 +1,94 @@
+#!/bin/bash
+# Local split version by webworker01
+# Original version by Split NN script by Decker (c) 2018
+#
+# Usage:  ./splitfunds <COINNAME> <numutxos>
+
+#==Options - Only Change These==
+
+#Your notary address that has funds to split
+NN_ADDRESS=
+#your pubkey
+NN_PUBKEY=
+#your rmd160 value
+NN_HASH160=
+
+#==End Options==
+
+#Do not change below for any reason!
+if [[ ! -z $1 ]] && [[ $1 != "KMD" ]]; then
+    coin=$1
+    asset=" -ac_name=$1"
+    datadir="$HOME/.komodo/$coin"
+else
+    coin="KMD"
+    asset=""
+    datadir="$HOME/.komodo"
+fi
+
+SPLIT_COUNT=$2
+#Splits > 252 are not allowed
+if [[ ! -z $SPLIT_COUNT ]] && (( SPLIT_COUNT > 252 )); then
+    SPLIT_COUNT=252
+elif [[ ! -z $SPLIT_COUNT ]] && (( SPLIT_COUNT > 0 )); then
+    SPLIT_COUNT=$2
+else
+    echo "it wasn't a number"
+    SPLIT_COUNT=50
+    exit;
+fi
+
+SPLIT_VALUE=0.0001
+SPLIT_VALUE_SATOSHI=10000
+SPLIT_TOTAL=$(jq -n "$SPLIT_VALUE*$SPLIT_COUNT")
+SPLIT_TOTAL_SATOSHI=$(jq -n "$SPLIT_VALUE*$SPLIT_COUNT*100000000")
+
+#Get lowest amount and valid utxo to split
+utxo=$(komodo-cli $asset listunspent | jq -r --arg minsize $SPLIT_TOTAL '[.[] | select(.amount>($minsize|tonumber) and .generated==false and .confirmations>0)] | sort_by(.amount)[0]')
+
+if [[ $utxo != "null" ]]; then
+
+    txid=$(echo "$utxo" | jq -r .txid)
+    vout=$(echo "$utxo" | jq -r .vout)
+    amount=$(echo "$utxo" | jq -r .amount)
+
+    echo "Amount: $amount"
+    echo "2Split: $SPLIT_TOTAL ($SPLIT_TOTAL_SATOSHI)"
+
+    rev_txid=$(echo $txid | dd conv=swab 2> /dev/null | rev)
+    vout_hex=$(printf "%08x" $vout | dd conv=swab 2> /dev/null | rev)
+    rawtx="04000080" # tx header
+    rawtx=$rawtx"85202f89" # versiongroupid
+    rawtx=$rawtx"01" # number of inputs (1, as we take one utxo from explorer listunspent)
+    rawtx=$rawtx$rev_txid$vout_hex"00ffffffff"
+
+    oc=$((SPLIT_COUNT+1))
+    outputCount=$(printf "%02x" $oc)
+
+    rawtx=$rawtx$outputCount
+    for (( i=1; i<=$SPLIT_COUNT; i++ )); do
+        value=$(printf "%016x" $SPLIT_VALUE_SATOSHI | dd conv=swab 2> /dev/null | rev)
+        rawtx=$rawtx$value
+        rawtx=$rawtx"2321"$NN_PUBKEY"ac"
+    done
+
+    change=$(echo "$amount*100000000-$SPLIT_TOTAL_SATOSHI/1*1" | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//')
+    echo "Change: $change"
+
+    value=$(printf "%016x" $change | dd conv=swab 2> /dev/null | rev)
+
+    rawtx=$rawtx$value
+    rawtx=$rawtx"1976a914"$NN_HASH160"88ac" # len OP_DUP OP_HASH160 len hash OP_EQUALVERIFY OP_CHECKSIG
+
+    nlocktime=$(printf "%08x" $(date +%s) | dd conv=swab 2> /dev/null | rev)
+    rawtx=$rawtx$nlocktime
+    rawtx=$rawtx"000000000000000000000000000000" # sapling end of tx
+
+    signedtx=$(komodo-cli $asset signrawtransaction $rawtx | jq -r '.hex')
+
+    if [[ ! -z $signedtx ]]; then
+        komodo-cli $asset sendrawtransaction $signedtx
+    fi
+else
+  echo -e "Error! No UTXOs to split :(("
+fi
