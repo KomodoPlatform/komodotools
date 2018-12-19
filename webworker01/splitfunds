@@ -2,24 +2,36 @@
 # Local split version by webworker01
 # Original version by Decker (c) 2018 <https://github.com/DeckerSU/komodo_scripts/blob/master/split_nn_sapling.sh>
 #
-# Usage:  ./splitfunds <COINNAME> <numutxos> <sapling=1/0>
-# e.g. ./splitfunds KMD 50
-# e.g. ./splitfunds OOT 50 0
+# Requires package dc - sudo apt-get install dc
+#
+# Usage: ./splitfunds <COINNAME> <numutxos> <sapling=1/0>
+# e.g.   ./splitfunds KMD 50
+# e.g.   ./splitfunds OOT 50 0
 
 #==Options - Only Change These==
 
-#Your notary address that has funds to split
+#Your local notary address that has funds to split
 NN_ADDRESS=
-#your pubkey
-NN_PUBKEY=
-#your rmd160 value
-NN_HASH160=
 
+#Full path to komodo-cli
 komodoexec=/usr/local/bin/komodo-cli
 
 #==End Options==
 
 #Do not change below for any reason!
+declare -a base58=(
+      1 2 3 4 5 6 7 8 9
+    A B C D E F G H   J K L M N   P Q R S T U V W X Y Z
+    a b c d e f g h i j k   m n o p q r s t u v w x y z
+)
+unset dcr; for i in {0..57}; do dcr+="${i}s${base58[i]}"; done
+decodeBase58() {
+    local line
+    echo -n "$1" | sed -e's/^\(1*\).*/\1/' -e's/1/00/g' | tr -d '\n'
+    dc -e "$dcr 16o0$(sed 's/./ 58*l&+/g' <<<$1)p" |
+    while read line; do echo -n ${line/\\/}; done
+}
+
 if [[ ! -z $1 ]] && [[ $1 != "KMD" ]]; then
     coin=$1
     asset=" -ac_name=$1"
@@ -49,6 +61,10 @@ SPLIT_VALUE=0.0001
 SPLIT_VALUE_SATOSHI=10000
 SPLIT_TOTAL=$(jq -n "$SPLIT_VALUE*$SPLIT_COUNT")
 SPLIT_TOTAL_SATOSHI=$(jq -n "$SPLIT_VALUE*$SPLIT_COUNT*100000000")
+
+NN_PUBKEY=$($komodoexec $asset validateaddress $NN_ADDRESS | jq -r .pubkey)
+nob58=$(decodeBase58 $NN_ADDRESS)
+NN_HASH160=$(echo ${nob58:2:-8})
 
 #Get lowest amount and valid utxo to split
 utxo=$($komodoexec $asset listunspent | jq -r --arg minsize $SPLIT_TOTAL '[.[] | select(.amount>($minsize|tonumber) and .generated==false and .rawconfirmations>0)] | sort_by(.amount)[0]')
