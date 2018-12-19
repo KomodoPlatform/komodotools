@@ -2,7 +2,9 @@
 # Local split version by webworker01
 # Original version by Decker (c) 2018 <https://github.com/DeckerSU/komodo_scripts/blob/master/split_nn_sapling.sh>
 #
-# Usage:  ./splitfunds <COINNAME> <numutxos>
+# Usage:  ./splitfunds <COINNAME> <numutxos> <sapling=1/0>
+# e.g. ./splitfunds KMD 50
+# e.g. ./splitfunds OOT 50 0
 
 #==Options - Only Change These==
 
@@ -37,7 +39,12 @@ elif [[ ! -z $SPLIT_COUNT ]] && (( SPLIT_COUNT > 0 )); then
 else
     #it wasn't a number, default to 50
     SPLIT_COUNT=50
-    exit;
+fi
+
+if [[ ! -z $3 ]] && [[ $3 != "1" ]]; then
+    sapling=0;
+else
+    sapling=1;
 fi
 
 SPLIT_VALUE=0.0001
@@ -56,8 +63,14 @@ if [[ $utxo != "null" ]]; then
 
     rev_txid=$(echo $txid | dd conv=swab 2> /dev/null | rev)
     vout_hex=$(printf "%08x" $vout | dd conv=swab 2> /dev/null | rev)
-    rawtx="04000080" # tx header
-    rawtx=$rawtx"85202f89" # versiongroupid
+
+    if (( sapling > 0 )); then
+        rawtx="04000080" # tx version
+        rawtx=$rawtx"85202f89" # versiongroupid
+    else
+        rawtx="01000000" # tx version
+    fi
+
     rawtx=$rawtx"01" # number of inputs (1, as we take one utxo from explorer listunspent)
     rawtx=$rawtx$rev_txid$vout_hex"00ffffffff"
 
@@ -80,13 +93,18 @@ if [[ $utxo != "null" ]]; then
 
     nlocktime=$(printf "%08x" $(date +%s) | dd conv=swab 2> /dev/null | rev)
     rawtx=$rawtx$nlocktime
-    rawtx=$rawtx"000000000000000000000000000000" # sapling end of tx
+
+    if (( sapling > 0 )); then
+        rawtx=$rawtx"000000000000000000000000000000" # sapling end of tx
+    fi
 
     signedtx=$($komodoexec $asset signrawtransaction $rawtx | jq -r '.hex')
 
     if [[ ! -z $signedtx ]]; then
         txid=$($komodoexec $asset sendrawtransaction $signedtx)
-        echo "$coin Split $SPLIT_TOTAL TXID: $txid"
+        echo "$coin Split $sapling $SPLIT_TOTAL TXID: $txid"
+    else
+        echo "$coin Split $sapling $SPLIT_TOTAL failed"
     fi
 else
   echo -e "Error! No UTXOs to split :(("
