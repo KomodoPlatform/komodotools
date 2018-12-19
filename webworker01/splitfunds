@@ -11,7 +11,7 @@
 #==Options - Only Change These==
 
 #Your local notary address that has funds to split
-NN_ADDRESS=
+NN_ADDRESS=RMbNsa4Nf3BAd16BQaAAmfzAgnuorUDrCr
 
 #Full path to komodo-cli
 komodoexec=/usr/local/bin/komodo-cli
@@ -19,6 +19,8 @@ komodoexec=/usr/local/bin/komodo-cli
 #==End Options==
 
 #Do not change below for any reason!
+
+#base58 decode by grondilu https://github.com/grondilu/bitcoin-bash-tools/blob/master/bitcoin.sh
 declare -a base58=(
       1 2 3 4 5 6 7 8 9
     A B C D E F G H   J K L M N   P Q R S T U V W X Y Z
