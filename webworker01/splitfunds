@@ -23,11 +23,9 @@ komodoexec=/usr/local/bin/komodo-cli
 if [[ ! -z $1 ]] && [[ $1 != "KMD" ]]; then
     coin=$1
     asset=" -ac_name=$1"
-    datadir="$HOME/.komodo/$coin"
 else
     coin="KMD"
     asset=""
-    datadir="$HOME/.komodo"
 fi
 
 SPLIT_COUNT=$2
@@ -42,9 +40,9 @@ else
 fi
 
 if [[ ! -z $3 ]] && [[ $3 != "1" ]]; then
-    sapling=0;
+    sapling=0
 else
-    sapling=1;
+    sapling=1
 fi
 
 SPLIT_VALUE=0.0001
@@ -53,7 +51,7 @@ SPLIT_TOTAL=$(jq -n "$SPLIT_VALUE*$SPLIT_COUNT")
 SPLIT_TOTAL_SATOSHI=$(jq -n "$SPLIT_VALUE*$SPLIT_COUNT*100000000")
 
 #Get lowest amount and valid utxo to split
-utxo=$($komodoexec $asset listunspent | jq -r --arg minsize $SPLIT_TOTAL '[.[] | select(.amount>($minsize|tonumber) and .generated==false and .confirmations>0)] | sort_by(.amount)[0]')
+utxo=$($komodoexec $asset listunspent | jq -r --arg minsize $SPLIT_TOTAL '[.[] | select(.amount>($minsize|tonumber) and .generated==false and .rawconfirmations>0)] | sort_by(.amount)[0]')
 
 if [[ $utxo != "null" ]]; then
 
@@ -71,7 +69,7 @@ if [[ $utxo != "null" ]]; then
         rawtx="01000000" # tx version
     fi
 
-    rawtx=$rawtx"01" # number of inputs (1, as we take one utxo from explorer listunspent)
+    rawtx=$rawtx"01" # number of inputs (1, as we take one utxo from listunspent)
     rawtx=$rawtx$rev_txid$vout_hex"00ffffffff"
 
     oc=$((SPLIT_COUNT+1))
