@@ -11,7 +11,7 @@
 #==Options - Only Change These==
 
 #Your local notary address that has funds to split
-NN_ADDRESS=RMbNsa4Nf3BAd16BQaAAmfzAgnuorUDrCr
+NN_ADDRESS=
 
 #Full path to komodo-cli
 komodoexec=/usr/local/bin/komodo-cli
