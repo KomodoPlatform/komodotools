@@ -69,7 +69,11 @@ nob58=$(decodeBase58 $NN_ADDRESS)
 NN_HASH160=$(echo ${nob58:2:-8})
 
 #Get lowest amount and valid utxo to split
-utxo=$($komodoexec $asset listunspent | jq -r --arg minsize $SPLIT_TOTAL '[.[] | select(.amount>($minsize|tonumber) and .generated==false and .rawconfirmations>0)] | sort_by(.amount)[0]')
+if [[ $coin != "VRSC" ]]; then
+    utxo=$($komodoexec $asset listunspent | jq -r --arg minsize $SPLIT_TOTAL '[.[] | select(.amount>($minsize|tonumber) and .generated==false and .rawconfirmations>0)] | sort_by(.amount)[0]')
+else
+    utxo=$($komodoexec $asset listunspent | jq -r --arg minsize $SPLIT_TOTAL '[.[] | select(.amount>($minsize|tonumber) and .generated==false and .confirmations>0)] | sort_by(.amount)[0]')
+fi
 
 if [[ $utxo != "null" ]]; then
 
