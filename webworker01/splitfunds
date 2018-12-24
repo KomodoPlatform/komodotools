@@ -61,7 +61,7 @@ fi
 
 SPLIT_VALUE=0.0001
 SPLIT_VALUE_SATOSHI=10000
-SPLIT_TOTAL=$(echo "scale=8; ($SPLIT_COUNT * $SPLIT_VALUE)" | bc)
+SPLIT_TOTAL=$(jq -n "$SPLIT_VALUE*$SPLIT_COUNT")
 
 NN_PUBKEY=$($komodoexec $asset validateaddress $NN_ADDRESS | jq -r .pubkey)
 nob58=$(decodeBase58 $NN_ADDRESS)
@@ -101,12 +101,11 @@ if [[ $utxo != "null" ]]; then
     outbits=$(eval printf "%0.s$outbits" {1..$SPLIT_COUNT})
     rawtx=$rawtx$outbits
 
-    change=$( printf "%0.8f" $(bc -l <<< "($amount-$SPLIT_TOTAL)") )
-    change=${change//./}
+    change=$( printf "%.8f" $(bc -l <<< "($amount-$SPLIT_TOTAL)") )
+    change=$( sed 's/^0*//' <<< ${change//./} )
+    change=$( printf "%016x" $change | dd conv=swab 2> /dev/null | rev )
+    rawtx=$rawtx$change
 
-    value=$(printf "%016x" $change | dd conv=swab 2> /dev/null | rev)
-
-    rawtx=$rawtx$value
     rawtx=$rawtx"1976a914"$NN_HASH160"88ac" # len OP_DUP OP_HASH160 len hash OP_EQUALVERIFY OP_CHECKSIG
 
     nlocktime=$(printf "%08x" $(date +%s) | dd conv=swab 2> /dev/null | rev)
