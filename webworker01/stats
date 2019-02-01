@@ -1,7 +1,9 @@
 #!/bin/bash
-#Stats script for Komodo Notary Nodes
+# Stats script for Komodo Notary Nodes
 #
-#Requires jq v1.5+ and bitcoin-cli, komodo-cli, chips-cli and gamecredits-cli installed (e.g. symlinked to /usr/local/bin)
+# by webworker01
+#
+# Requires jq v1.5+ and bitcoin-cli, komodo-cli, chips-cli and gamecredits-cli installed (e.g. symlinked to /usr/local/bin)
 
 #==Options - Only Change These==
 
@@ -16,7 +18,7 @@ ignoreacs=('VOTE2018' 'BEER' 'PIZZA')
 
 #git checking - path and remote branch
 declare -A repos=(
-[KMD]='$HOME/komodo origin/dev'
+[KMD]='$HOME/komodo origin/beta'
 [SUPERNET]='$HOME/SuperNET origin/dev'
 [CHIPS]='$HOME/chips3 origin/dev'
 [GAME]='/home/gamecredits/GameCredits origin/master'
@@ -108,7 +110,7 @@ timefilter=1525032458
 #Second time filter for assetchains (SuperNET commit 07515fb)
 timefilter2=1525513998
 
-format="%-11s %6s %6s %7s %.8s %6s %6s %5s %6s"
+format="%-11s %6s %7s %6s %.8s %8s %7s %5s %6s %6s"
 
 othercoins=(
 'BTC bitcoin-cli'
@@ -125,7 +127,7 @@ outputstats ()
     now=$(date +"%H:%M")
 
     printf "\n\n"
-    printf "%-11s %6s %6s %7s %8s %6s %5s %6s\n" "-ASSET-" "-NOTR-" "-UTXO-" "-BLOX-" "-BAL-" "-LAST-" "-CON-" "-SIZE-";
+    printf "%-11s %6s %7s %6s %8s %8s %7s %5s %6s\n" "-CHAIN-" "-NOTR-" "-LASTN-" "-UTXO-" "-BAL-" "-BLOX-" "-LASTB-" "-CON-" "-SIZE-";
 
     kmdinfo=$(komodo-cli getinfo)
     kmdtxinfo=$(komodo-cli listtransactions "" $txscanamount)
@@ -134,10 +136,11 @@ outputstats ()
     repo=(${repos[KMD]})
     printf "$format\n" "KMD$(checkRepo KMD ${repo[0]} ${repo[1]})" \
             "" \
-            "$kmdutxos" \
-            "$(echo $kmdinfo | jq .blocks)" \
-            "$(printf "%8.3f" $(echo $kmdinfo | jq .balance))" \
             "$(timeSince $kmdlastntrztime)" \
+            "$kmdutxos" \
+            "$(printf "%8.3f" $(echo $kmdinfo | jq .balance))" \
+            "$(echo $kmdinfo | jq .blocks)" \
+            "$(timeSince $(komodo-cli getblock $(komodo-cli getbestblockhash) | jq .time))" \
             "$(echo $kmdinfo | jq .connections)" \
             "$(ls -lh ~/.komodo/wallet.dat  | awk '{print $5}')" \
             "$(echo $kmdtxinfo | jq '[.[] | select(.generated==true)] | length') mined"
@@ -176,10 +179,11 @@ outputstats ()
         repo=(${repos[${coin[0]}]})
         printf "$format\n" "${coin[0]}$(checkRepo ${coin[0]} ${repo[0]} ${repo[1]})" \
                 "$coinsntrzd" \
-                "$otherutxo" \
-                "$(${coin[1]} getblockchaininfo | jq .blocks)" \
-                "$(printf "%8.3f" $(${coin[1]} getbalance))" \
                 "$(timeSince $coinslastntrztime)" \
+                "$otherutxo" \
+                "$(printf "%8.3f" $(${coin[1]} getbalance))" \
+                "$(${coin[1]} getblockchaininfo | jq .blocks)" \
+                "$(timeSince $(${coin[1]} getblock $(${coin[1]} getbestblockhash) | jq .time))" \
                 "$(${coin[1]} getnetworkinfo | jq .connections)" \
                 ""
     done
@@ -208,10 +212,11 @@ outputstats ()
             fi
             printf "$format" "${coin[0]}$(checkRepo ${coin[0]} ${repo[0]} ${repo[1]})" \
                     "$acntrzd" \
-                    "$acutxo" \
-                    "$(echo $info | jq .blocks)" \
-                    "$(printf "%8.3f" $(echo $info | jq .balance))" \
                     "$(timeSince $lastntrztime)" \
+                    "$acutxo" \
+                    "$(printf "%8.3f" $(echo $info | jq .balance))" \
+                    "$(echo $info | jq .blocks)" \
+                    "$(timeSince $(komodo-cli -ac_name=${coin[0]} getblock $(komodo-cli -ac_name=${coin[0]} getbestblockhash) | jq .time))" \
                     "$(echo $info | jq .connections)" \
                     "$(ls -lh ~/.komodo/${coin[0]}/wallet.dat  | awk '{print $5}')" \
                     "$laststring" 
@@ -219,13 +224,14 @@ outputstats ()
             if [[ ${coin[0]} != ${lastcoin[0]} ]]; then
                 echo
             fi
-        fi
+        fi 
     done
 }
 
 if [ "$sleepytime" != "false" ]; then
     while true; do
         outputstats
+        /home/komodo/collectinterest
         sleep $sleepytime
     done
 else
