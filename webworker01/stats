@@ -231,6 +231,7 @@ outputstats ()
 if [ "$sleepytime" != "false" ]; then
     while true; do
         outputstats
+        /home/komodo/collectinterest
         sleep $sleepytime
     done
 else
