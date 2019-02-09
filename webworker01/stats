@@ -24,9 +24,23 @@ declare -A repos=(
 [GAME]='/home/gamecredits/GameCredits origin/master'
 [HUSH]='/home/hush/hush origin/dev'
 [EMC2]='/home/emc2/einsteinium origin/master'
+[GIN]='/home/gin/gincoin-core origin/master'
+)
+
+#declare non komodo clis
+othercoins=(
+'BTC bitcoin-cli'
+'CHIPS chips-cli'
+'GAME gamecredits-cli'
+'HUSH hush-cli'
+'EMC2 einsteinium-cli'
+'GIN gincoin-cli'
 )
 
 #==End Options==
+
+color_red=$'\033[0;31m'
+color_reset=$'\033[0m'
 
 timeSince () {
     local currentimestamp=$(date +%s)
@@ -65,9 +79,6 @@ checkRepo () {
     prevdir=${PWD}
 
     eval cd "$2"
-
-    color_red=$'\033[0;31m'
-    color_reset=$'\033[0m'
 
     git remote update > /dev/null 2>&1
 
@@ -110,15 +121,7 @@ timefilter=1525032458
 #Second time filter for assetchains (SuperNET commit 07515fb)
 timefilter2=1525513998
 
-format="%-11s %6s %7s %6s %.8s %8s %7s %5s %6s %6s"
-
-othercoins=(
-'BTC bitcoin-cli'
-'CHIPS chips-cli'
-'GAME gamecredits-cli'
-'HUSH hush-cli'
-'EMC2 einsteinium-cli'
-)
+format="%-11s %6s %7s %6s %.20s %8s %7s %5s %6s %6s"
 
 outputstats ()
 {
@@ -157,6 +160,10 @@ outputstats ()
                 coinsutxoamount=0.00100000
                 coinsntraddr=Gftmt8hgzgNu6f1o85HMPuwTVBMSV2TYSt
                 ;;
+            GIN)
+                coinsutxoamount=$utxoamt
+                coinsntraddr=Gftmt8hgzgNu6f1o85HMPuwTVBMSV2TYSt
+                ;;
             HUSH)
                 coinsutxoamount=$utxoamt
                 coinsntraddr=t1fvTULnsz9ZCcpmQ8ZSN6xhUpfkgEuqeNX
@@ -177,11 +184,17 @@ outputstats ()
         otherutxo=$(${coin[1]} listunspent | jq --arg amt "$coinsutxoamount" '[.[] | select(.amount==($amt|tonumber))] | length')
         totalntrzd=$(( $totalntrzd + $coinsntrzd ))
         repo=(${repos[${coin[0]}]})
+        balance=$(${coin[1]} getbalance)
+        if (( $(echo "$balance < 0.02" | bc) )); then
+            balance="${color_red}$(printf "%8.3f" $balance)${color_reset}"
+        else
+            balance=$(printf "%8.3f" $balance)
+        fi
         printf "$format\n" "${coin[0]}$(checkRepo ${coin[0]} ${repo[0]} ${repo[1]})" \
                 "$coinsntrzd" \
                 "$(timeSince $coinslastntrztime)" \
                 "$otherutxo" \
-                "$(printf "%8.3f" $(${coin[1]} getbalance))" \
+                "$balance" \
                 "$(${coin[1]} getblockchaininfo | jq .blocks)" \
                 "$(timeSince $(${coin[1]} getblock $(${coin[1]} getbestblockhash) | jq .time))" \
                 "$(${coin[1]} getnetworkinfo | jq .connections)" \
@@ -202,6 +215,12 @@ outputstats ()
             totalntrzd=$(( $totalntrzd + $acntrzd ))
             acutxo=$(komodo-cli -ac_name=${coin[0]} listunspent | jq --arg amt "$utxoamt" '[.[] | select(.amount==($amt|tonumber))] | length')
             repo=(${repos[${coin[0]}]})
+            balance=$(jq .balance <<< $info)
+            if (( $(echo "$balance < 0.02" | bc) )); then
+                balance="${color_red}$(printf "%8.3f" $balance)${color_reset}"
+            else
+                balance=$(printf "%8.3f" $balance)
+            fi
             laststring=""
 
             if [[ ${coin[0]} == ${lastcoin[0]} ]]; then
@@ -210,11 +229,12 @@ outputstats ()
             if [[ ${coin[0]} == ${secondlast[0]} ]]; then
                 laststring="All:$totalntrzd"
             fi
+
             printf "$format" "${coin[0]}$(checkRepo ${coin[0]} ${repo[0]} ${repo[1]})" \
                     "$acntrzd" \
                     "$(timeSince $lastntrztime)" \
                     "$acutxo" \
-                    "$(printf "%8.3f" $(echo $info | jq .balance))" \
+                    "$balance" \
                     "$(echo $info | jq .blocks)" \
                     "$(timeSince $(komodo-cli -ac_name=${coin[0]} getblock $(komodo-cli -ac_name=${coin[0]} getbestblockhash) | jq .time))" \
                     "$(echo $info | jq .connections)" \
