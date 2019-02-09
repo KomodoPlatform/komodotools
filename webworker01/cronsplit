@@ -1,5 +1,9 @@
 #!/bin/bash
 #
+# Split funds cron job
+#
+# by webworker01
+#
 # Suggest setting up 2 crontabs, 1 for komodo and assetchains and the other hourly for longer potential blocktimes
 #
 # crontab -e
@@ -21,6 +25,7 @@ othercoins=(
 'GAME /usr/local/bin/gamecredits-cli'
 'HUSH /usr/local/bin/hush-cli'
 'EMC2 /usr/local/bin/einsteinium-cli'
+'GIN /usr/local/bin/gincoin-cli'
 )
 
 sproutcoins=('OOT' 'ZILLA')

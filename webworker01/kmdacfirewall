@@ -14,6 +14,7 @@ sudo ufw allow 40002 comment 'GAME'
 #sudo ufw allow 8333  comment 'BTC'
 sudo ufw allow 8888  comment 'HUSH'
 sudo ufw allow 41878 comment 'EMC2'
+sudo ufw allow 10111 comment 'GIN'
 
 for coins in "${coinlist[@]}"; do
     coin=($coins)
