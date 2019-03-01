@@ -1,8 +1,19 @@
 #!/bin/bash
+# blocknotify script to disable mining when notary not eligible for easy mining
+#
+# by webworker01
+#
+# Requires jq v1.5+ - sudo apt-get install jq
+#
+# komodo-cli installed (e.g. symlinked to /usr/local/bin)
+#
+# Add to ~/.komodo/komodo.conf:
+#
+# blocknotify=/home/komodo/minerfixer %s
+#
 
-kmdinfo=$(komodo-cli getinfo)
-currentheight=$(echo $kmdinfo | jq -r .blocks)
 lastgen=$(komodo-cli listtransactions "" 777 | jq '[.[] | select(.generated==true)] | .[-1]')
+
 if [[ "$lastgen" != "null" ]]; then
     confirmations=$(echo $lastgen | jq .confirmations)
     rawconfirmations=$(echo $lastgen | jq .rawconfirmations)
