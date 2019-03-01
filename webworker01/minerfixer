@@ -1,0 +1,37 @@
+#!/bin/bash
+
+kmdinfo=$(komodo-cli getinfo)
+currentheight=$(echo $kmdinfo | jq -r .blocks)
+lastgen=$(komodo-cli listtransactions "" 777 | jq '[.[] | select(.generated==true)] | .[-1]')
+if [[ "$lastgen" != "null" ]]; then
+    confirmations=$(echo $lastgen | jq .confirmations)
+    rawconfirmations=$(echo $lastgen | jq .rawconfirmations)
+    lastamount=$(echo $lastgen | jq .amount)
+    lasthash=$(echo $lastgen | jq -r .blockhash)
+    lastheight=$(komodo-cli getblockheader $lasthash | jq -r .height)
+
+    printf "Last Amt:$lastamount Ht:$lastheight RawConfs:$rawconfirmations Confs:$confirmations"
+
+    #between 3 and 64 confirmations go into power saving mode
+    if (( (rawconfirmations > 2 && rawconfirmations < 65) )); then
+        eligible=$(( 65 - rawconfirmations ))
+        printf " \033[0;32m[energy saving mode ${eligible}]\033[0m\n"
+        komodo-cli setgenerate false
+
+    #turn on setgenerate upon eligibility
+    elif (( testffa == 64 || rawconfirmations == 65 )); then
+        printf " \033[0;31m[setgenerate true]\033[0m\n"
+        komodo-cli setgenerate true 1
+
+    elif (( rawconfirmations < 3 )); then
+        printf " \033[0;32m[Block Found!]\033[0m\n"
+
+    #Default to do nothing and assume mining
+    else
+        printf " \033[0;31m[mining]\033[0m\n"
+    fi
+else
+    printf " \033[0;31m[could not get last mined tx]\033[0m\n"
+    printf " \033[0;31m[setgenerate true]\033[0m\n"
+    komodo-cli setgenerate true 1
+fi
