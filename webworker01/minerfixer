@@ -30,7 +30,7 @@ if [[ "$lastgen" != "null" ]]; then
         komodo-cli setgenerate false
 
     #turn on setgenerate upon eligibility
-    elif (( testffa == 64 || rawconfirmations == 65 )); then
+    elif (( rawconfirmations == 65 )); then
         printf " \033[0;31m[setgenerate true]\033[0m\n"
         komodo-cli setgenerate true 1
 
