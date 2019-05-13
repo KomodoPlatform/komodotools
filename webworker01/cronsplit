@@ -23,7 +23,6 @@ othercoins=(
 'BTC /usr/bin/bitcoin-cli'
 'CHIPS /usr/local/bin/chips-cli'
 'GAME /usr/local/bin/gamecredits-cli'
-'HUSH /usr/local/bin/hush-cli'
 'EMC2 /usr/local/bin/einsteinium-cli'
 'GIN /usr/local/bin/gincoin-cli'
 )
