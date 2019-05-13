@@ -1,4 +1,13 @@
 #!/bin/bash
-chipsd &
-cd komodo
-./src/komodod -gen -genproclimit=2 -notary -pubkey="02b207a2be16f205184664c88c8dc842f128a79a3a6c03741e5506cb480cb48268" &
+source ~/komodo/src/pubkey.txt
+bitcoind &
+chipsd -pubkey=$pubkey &
+gamecreditsd -pubkey=$pubkey &
+einsteiniumd -pubkey=$pubkey &
+gincoind -pubkey=$pubkey &
+~/VerusCoin/src/verusd -pubkey=$pubkey &
+~/hush3/src/hushd -pubkey=$pubkey &
+cd komodo/src
+./komodod -gen -genproclimit=1 -notary -pubkey=$pubkey &
+sleep 600
+./assetchains
