@@ -1,0 +1,4 @@
+#!/bin/bash
+name=$1
+
+~/komodo/src/komodo-cli -ac_name=$name $2 $3 $4 $5 $6 $7 $8 $9

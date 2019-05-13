@@ -1,0 +1,53 @@
+#!/bin/bash
+source pubkey.txt
+source coinlist
+
+freqten=('RFOX VRSC')
+freqtwo=('KMDICE')
+sleeptime=1
+
+if [[ ! -z $1 ]]; then
+    case "$1" in
+        GAME|EMC2)
+            curl --url "http://127.0.0.1:7776" --data "{\"agent\":\"iguana\",\"method\":\"dpow\",\"symbol\":\"GAME\",\"freq\":5,\"pubkey\":\"$pubkey\"}"
+            ;;
+        RFOX|VRSC)
+            curl --url "http://127.0.0.1:7776" --data "{\"agent\":\"iguana\",\"method\":\"dpow\",\"symbol\":\"$1\",\"freq\":10,\"pubkey\":\"$pubkey\"}"
+            ;;
+        KMDICE)
+            curl --url "http://127.0.0.1:7776" --data "{\"agent\":\"iguana\",\"method\":\"dpow\",\"symbol\":\"$1\",\"freq\":2,\"pubkey\":\"$pubkey\"}"
+            ;;
+        *)
+            curl --url "http://127.0.0.1:7776" --data "{\"agent\":\"iguana\",\"method\":\"dpow\",\"symbol\":\"$1\",\"pubkey\":\"$pubkey\"}"
+            ;;
+    esac
+else
+    for coins in "${coinlist[@]}"; do
+        coin=($coins)
+
+        echo "DPOW: ${coin[0]}"
+        if [[ ${freqten[*]} =~ ${coin[0]} ]]; then
+            echo "Freq 10"
+            curl --url "http://127.0.0.1:7776" --data "{\"agent\":\"iguana\",\"method\":\"dpow\",\"symbol\":\"${coin[0]}\",\"freq\":10,\"pubkey\":\"$pubkey\"}"
+        elif [[ ${freqtwo[*]} =~ ${coin[0]} ]]; then
+            echo "Freq 2"
+            curl --url "http://127.0.0.1:7776" --data "{\"agent\":\"iguana\",\"method\":\"dpow\",\"symbol\":\"${coin[0]}\",\"freq\":2,\"pubkey\":\"$pubkey\"}"
+        else
+            echo "Freq Default"
+            curl --url "http://127.0.0.1:7776" --data "{\"agent\":\"iguana\",\"method\":\"dpow\",\"symbol\":\"${coin[0]}\",\"pubkey\":\"$pubkey\"}"
+        fi
+        sleep $sleeptime
+    done
+
+    echo "DPOW: CHIPS"
+    curl --url "http://127.0.0.1:7776" --data "{\"agent\":\"iguana\",\"method\":\"dpow\",\"symbol\":\"CHIPS\",\"pubkey\":\"$pubkey\"}"
+    sleep $sleeptime
+    echo "DPOW: GAME"
+    curl --url "http://127.0.0.1:7776" --data "{\"agent\":\"iguana\",\"method\":\"dpow\",\"symbol\":\"GAME\",\"freq\":5,\"pubkey\":\"$pubkey\"}"
+    sleep $sleeptime
+    echo "DPOW: EMC2"
+    curl --url "http://127.0.0.1:7776" --data "{\"agent\":\"iguana\",\"method\":\"dpow\",\"symbol\":\"EMC2\",\"freq\":5,\"pubkey\":\"$pubkey\"}"
+    echo "DPOW: GIN"
+    curl --url "http://127.0.0.1:7776" --data "{\"agent\":\"iguana\",\"method\":\"dpow\",\"symbol\":\"GIN\",\"pubkey\":\"$pubkey\"}"
+fi
+
