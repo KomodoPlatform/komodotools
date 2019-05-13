@@ -26,20 +26,19 @@ declare -A repos=(
 [KMD]='$HOME/komodo origin/beta'
 [SUPERNET]='$HOME/SuperNET origin/dev'
 [CHIPS]='$HOME/chips3 origin/dev'
-[GAME]='/home/gamecredits/GameCredits origin/master'
-[HUSH]='/home/hush/hush origin/dev'
-[EMC2]='/home/emc2/einsteinium origin/master'
-[GIN]='/home/gin/gincoin-core origin/master'
+[GAME]='$HOME/GameCredits origin/master'
+[EMC2]='$HOME/einsteinium origin/master'
+[GIN]='$HOME/gincoin-core origin/master'
+[VRSC]='$HOME/VerusCoin origin/master'
 )
 
 #declare non komodo clis - symlink them to /usr/local/bin or set the full path accessible as the second part of each string
 othercoins=(
-'BTC bitcoin-cli'
-'CHIPS chips-cli'
-'GAME gamecredits-cli'
-'HUSH hush-cli'
-'EMC2 einsteinium-cli'
-'GIN gincoin-cli'
+'BTC bitcoin-cli .bitcoin'
+'CHIPS chips-cli .chips'
+'GAME gamecredits-cli .gamecredits'
+'EMC2 einsteinium-cli .einsteinium'
+'GIN gincoin-cli .gincoincore'
 )
 
 #==End Options==
@@ -203,7 +202,7 @@ outputstats ()
                 "$(${coin[1]} getblockchaininfo | jq .blocks)" \
                 "$(timeSince $(${coin[1]} getblock $(${coin[1]} getbestblockhash) | jq .time))" \
                 "$(${coin[1]} getnetworkinfo | jq .connections)" \
-                ""
+                "$(ls -lh ~/${coin[2]}/wallet.dat | awk '{print $5}')"
     done
 
     lastcoin=(${coinlist[-1]})
@@ -244,7 +243,7 @@ outputstats ()
                     "$(timeSince $($komodoexec -ac_name=${coin[0]} getblock $($komodoexec -ac_name=${coin[0]} getbestblockhash) | jq .time))" \
                     "$(echo $info | jq .connections)" \
                     "$(ls -lh ~/.komodo/${coin[0]}/wallet.dat  | awk '{print $5}')" \
-                    "$laststring" 
+                    "$laststring"
 
             if [[ ${coin[0]} != ${lastcoin[0]} ]]; then
                 echo
