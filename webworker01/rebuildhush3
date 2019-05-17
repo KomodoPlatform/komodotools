@@ -1,0 +1,5 @@
+#!/bin/bash
+cd ~/hush3
+git pull
+make clean
+./zcutil/build.sh -j$(nproc)

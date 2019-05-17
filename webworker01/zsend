@@ -1,0 +1,50 @@
+#!/bin/bash
+#
+# Script to simplify sending a specified amount to/from z addressess
+#
+# by webworker01
+#
+# Requires bc - sudo apt-get install bc
+#
+# Usage: zsend <coinname> <fromaddress> <toaddress> <amounttosend>
+#
+
+komodoexec="komodo-cli"
+
+if [[ -z $1 ]] || [[ -z $2 ]] || [[ -z $3 ]] || [[ -z $4 ]]; then
+    echo "Usage: zsend <coinname> <fromaddress> <toaddress> <amounttosend>"
+    exit 0
+fi
+
+if [[ $1 != "KMD" ]]; then
+    coin=$1
+    asset=" -ac_name=$1"
+else
+    coin="KMD"
+    asset=""
+fi
+
+fromaddress=$2
+toaddress=$3
+amounttosend=$4
+
+#get balance
+zbalance=$($komodoexec $asset z_getbalance $fromaddress)
+
+if (( $(echo "$amounttosend > $zbalance" | bc -l) )); then
+    echo "You cannot send more than your shielded balanced of $zbalance!"
+    exit 0
+fi
+
+change=$( printf "%.8f" $(bc -l <<< "($zbalance-$amounttosend)") )
+
+echo "Balance: $zbalance"
+echo "Send: $amounttosend"
+echo "Change: $change"
+
+if [[ $change == "0.00000000" ]]; then
+    opid=$( $komodoexec $asset z_sendmany $fromaddress '[{"address":"'''$toaddress'''","amount":'''$amounttosend'''}]' 1 0 )
+else
+    opid=$( $komodoexec $asset z_sendmany $fromaddress '[{"address":"'''$toaddress'''","amount":'''$amounttosend'''},{"address":"'''$fromaddress'''","amount":'''$change'''}]' 1 0 )
+fi
+echo $opid

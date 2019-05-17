@@ -1,0 +1,15 @@
+#!/bin/bash
+source coinlist
+count=0
+
+while [ "x${coinlist[count]}" != "x" ]
+do
+  all=${coinlist[count]}
+  name=${all%% *}
+  if [ "$name" != "" ]
+    then
+     echo $name 
+     ~/komodo/src/komodo-cli -ac_name=$name $1 $2 $3 $4 $5 $6 $7 $8 $9
+  fi
+  count=$(( $count +1 ))
+done
