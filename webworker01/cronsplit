@@ -31,7 +31,7 @@ sproutcoins=('OOT' 'ZILLA')
 
 kmdutxoqty=50
 acutxoqty=50
-otherutxoqty=50
+otherutxoqty=200
 
 utxoamt=0.00010000
 splitamount=10000
