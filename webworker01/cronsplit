@@ -31,7 +31,8 @@ sproutcoins=('OOT' 'ZILLA')
 
 kmdutxoqty=50
 acutxoqty=50
-otherutxoqty=200
+btcutxoqty=200
+otherutxoqty=50
 
 utxoamt=0.00010000
 splitamount=10000
@@ -78,6 +79,10 @@ else
         else
             coinsutxoamount=$utxoamt
             coinsplitamount=$splitamount
+        fi
+
+        if [[ ${coin[0]} == "BTC" ]]; then
+            otherutxoqty=$btcutxoqty
         fi
 
         otherutxo=$(${coin[1]} listunspent | jq --arg amt "$coinsutxoamount" '[.[] | select(.amount==($amt|tonumber))] | length')
