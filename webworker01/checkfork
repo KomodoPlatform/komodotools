@@ -110,7 +110,7 @@ outputRow "CHIPS" $blocks $longest $blockhash
 
 #GAME
 blocks=$(gamecredits-cli getinfo | jq .blocks)
-longest=""
+longest=$blocks
 blockhash=$(gamecredits-cli getbestblockhash)
 parseKomodostats "GAME" "$remotecheck"
 remoteblocks2=""
