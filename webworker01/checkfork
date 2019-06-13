@@ -29,7 +29,7 @@ parseDexstats()
     local coin=$1
     local remotedata=$2
     remoteblocks2=$(jq --arg coinname $coin '.status[] | select(.chain==$coinname) | .height | tonumber' <<< $remotedata)
-    remotehash2=$(jq --arg coinname $coin '.status[] | select(.chain==$coinname) | .hash' <<< $remotedata)
+    remotehash2=$(jq -r --arg coinname $coin '.status[] | select(.chain==$coinname) | .hash' <<< $remotedata)
 }
 
 parseNotarystats()
@@ -37,7 +37,7 @@ parseNotarystats()
     local coin=$1
     local remotedata=$2
     remoteblocks3=$(jq --arg coinname $coin '.coin[] | select(.name==$coinname) | .block' <<< $remotedata)
-    remotehash3=$(jq --arg coinname $coin '.coin[] | select(.name==$coinname) | .bestblockhash' <<< $remotedata)
+    remotehash3=$(jq -r --arg coinname $coin '.coin[] | select(.name==$coinname) | .bestblockhash' <<< $remotedata)
 }
 
 outputRow()
@@ -83,7 +83,20 @@ outputRow()
             thisformat=$redformat
         fi
 
-        printf "$thisformat" "$coinname" "$localblocks" "$locallongest" "$remoteblocks[$diff1]" "$remoteblocks2[$diff2]" "$remoteblocks3[$diff3]"
+        hasherror2=""
+        if [[ -z $remotehash2 ]] && [[ "$hashatheight2" != "$remotehash2" ]]; then
+            forked=true
+            hasherror2="!! "
+            echo "Dexstats Hash Mismatch Local: $hashatheight2 Remote: $remotehash2"
+        fi
+        hasherror3=""
+        if [[ -z $remotehash3 ]] && [[ "$hashatheight3" != "$remotehash3" ]]; then
+            forked=true
+            hasherror3="!! "
+            echo "Notarystats Hash Mismatch Local: $hashatheight3 Remote: $remotehash3"
+        fi
+
+        printf "$thisformat" "$coinname" "$localblocks" "$locallongest" "${remoteblocks}[$diff1]" "${hasherror2}$remoteblocks2[$diff2]" "${hasherror3}$remoteblocks3[$diff3]"
     else
         printf "$format" "$coinname" "$localblocks" "$locallongest" "$remoteblocks" "$remoteblocks2" "$remoteblocks3"
     fi
@@ -96,7 +109,8 @@ blockhash=$(komodo-cli getbestblockhash)
 parseKomodostats "KMD" "$remotecheck"
 parseDexstats "KMD" "$remotecheck2"
 parseNotarystats "KMD" "$remotecheck3"
-thisformat=$format
+hashatheight2=$(komodo-cli getblockhash $remoteblocks2)
+hashatheight3=$(komodo-cli getblockhash $remoteblocks3)
 outputRow "KMD" $blocks $longest $blockhash
 
 #CHIPS
@@ -105,7 +119,10 @@ longest=$(chips-cli getinfo | jq .headers)
 blockhash=$(chips-cli getbestblockhash)
 parseKomodostats "CHIPS" "$remotecheck"
 remoteblocks2=""
+remotehash2=
+hashatheight2=
 parseNotarystats "CHIPS" "$remotecheck3"
+hashatheight3=$(chips-cli getblockhash $remoteblocks3)
 outputRow "CHIPS" $blocks $longest $blockhash
 
 #GAME
@@ -114,7 +131,10 @@ longest=$blocks
 blockhash=$(gamecredits-cli getbestblockhash)
 parseKomodostats "GAME" "$remotecheck"
 remoteblocks2=""
+remotehash2=
+hashatheight2=
 parseNotarystats "GAME" "$remotecheck3"
+hashatheight3=$(gamecredits-cli getblockhash $remoteblocks3)
 outputRow "GAME" $blocks $longest $blockhash
 
 #Loop through coinlist coins
@@ -128,7 +148,8 @@ for coins in "${coinlist[@]}"; do
         parseKomodostats "${coin[0]}" "$remotecheck"
         parseDexstats "${coin[0]}" "$remotecheck2"
         parseNotarystats "${coin[0]}" "$remotecheck3"
-        thisformat=$format
+        hashatheight2=$(komodo-cli -ac_name=${coin[0]} getblockhash $remoteblocks2)
+        hashatheight3=$(komodo-cli -ac_name=${coin[0]} getblockhash $remoteblocks3)
         outputRow "${coin[0]}" $blocks $longest $blockhash
     fi
 done
