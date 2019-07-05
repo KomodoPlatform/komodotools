@@ -95,19 +95,13 @@ checkRepo () {
     fi
 
     case $1 in
-        KMD)
+        KMD|GIN)
             printf "     "
             ;;
         CHIPS)
             printf "   "
             ;;
-        GAME)
-            printf "    "
-            ;;
-        HUSH)
-            printf "    "
-            ;;
-        EMC2)
+        GAME|EMC2)
             printf "    "
             ;;
     esac
